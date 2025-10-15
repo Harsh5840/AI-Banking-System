@@ -11,3 +11,23 @@ export const prisma =
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+// Re-export Prisma types
+export { Role, Account, AccountType, User } from '@prisma/client';
+
+// Re-export database functions from account module
+export {
+  createAccount,
+  getUserAccounts,
+  getAccountById,
+  deleteAccount,
+  updateAccountName,
+} from './account';
+
+// Re-export database functions from transaction module
+export {
+  addTransactionFromCore,
+  reverseTransaction,
+  getAllTransactions,
+} from './transaction';
+

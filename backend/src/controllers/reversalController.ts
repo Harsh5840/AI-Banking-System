@@ -3,7 +3,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../db/client';
 import { createTransaction } from '../core/ledger';
-import { addTransactionFromCore } from '../db/client/src/transaction';
+import { addTransactionFromCore } from '../db/transaction';
 
 export const handleReversal = async (req: Request, res: Response) => {
   try {

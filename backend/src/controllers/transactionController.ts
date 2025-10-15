@@ -29,9 +29,9 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
     let creditCategory = "others";
 
     if (type === "expense") {
-      debitCategory = await classifyCategory({ data: description, timestamp });
+      debitCategory = classifyCategory(description);
     } else if (type === "income") {
-      creditCategory = await classifyCategory({ data: description, timestamp });
+      creditCategory = classifyCategory(description);
     } else if (type === "transfer") {
       debitCategory = "transfer";
       creditCategory = "transfer";

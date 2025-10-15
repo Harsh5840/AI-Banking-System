@@ -4,7 +4,7 @@ import {
   addTransactionFromCore,
   reverseTransaction as reverseTxFromDB,
   getAllTransactions as fetchUserTransactions,
-} from "../db/client/src/transaction";
+} from "../db/transaction";
 
 const MAX_REVERSAL_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
