@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String?
+  name          String?
+  googleId      String?        @unique
+  githubId      String?        @unique
+  image         String?
+  role          Role           @default(USER)
+  accounts      Account[]
+  entries       LedgerEntry[]
+  transactions  Transaction[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Transaction {
+  id            String         @id @default(uuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id])
+  amount        Float
+  category      String         @default("others")
+  timestamp     DateTime       @default(now())
+  riskScore     Float?         
+  isFlagged     Boolean        @default(false)
+  reasons       String?        
+  description   String?        
+  createdAt     DateTime       @default(now())
+  ledgerEntries LedgerEntry[]
+  parentId      String?
+  parent        Transaction?   @relation("ReversalLink", fields: [parentId], references: [id])
+  children      Transaction[]  @relation("ReversalLink")
+}
+
+model Account {
+  id        String        @id @default(uuid())
+  name      String
+  type      AccountType
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  entries   LedgerEntry[]
+  createdAt DateTime      @default(now())
+}
+
+model LedgerEntry {
+  id            String        @id @default(uuid())
+  accountId     String
+  account       Account       @relation(fields: [accountId], references: [id])
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  type          EntryType
+  amount        Float
+  timestamp     DateTime      @default(now())
+  hash          String        @unique
+  prevHash      String?
+  originalHash  String?
+  isReversal    Boolean       @default(false)
+  category      String?       
+  flagged       Boolean       @default(false)
+  riskScore     Float?        
+  description   String?
+  transactionId String
+  transaction   Transaction   @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, category])  
+  @@index([userId, timestamp])
+  @@index([riskScore, flagged])
+  @@index([hash])
+  @@index([originalHash])
+  @@index([prevHash])
+}
+
+enum Role {
+  USER
+  ADMIN
+  AUDITOR
+}
+
+enum AccountType {
+  WALLET
+  SAVINGS
+  BUSINESS
+}
+
+enum EntryType {
+  debit
+  credit
+}
