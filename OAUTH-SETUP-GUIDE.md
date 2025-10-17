@@ -36,7 +36,7 @@ For OAuth to work, you **MUST** add these redirect URIs to your OAuth apps:
 
 ---
 
-### 🟣 GitHub OAuth Setup
+###  GitHub OAuth Setup
 
 1. **Go to:** [GitHub Developer Settings](https://github.com/settings/developers)
 2. **Click** on your OAuth App or create a new one

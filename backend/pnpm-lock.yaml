@@ -20,6 +20,9 @@ importers:
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
+      axios:
+        specifier: ^1.12.2
+        version: 1.12.2(debug@4.4.3(supports-color@9.4.0))
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -58,7 +61,7 @@ importers:
         version: 9.0.2
       langchain:
         specifier: ^0.3.9
-        version: 0.3.36(@langchain/core@0.3.78(openai@4.104.0(zod@3.25.76)))(openai@4.104.0(zod@3.25.76))
+        version: 0.3.36(@langchain/core@0.3.78(openai@4.104.0(zod@3.25.76)))(axios@1.12.2(debug@4.4.3(supports-color@9.4.0)))(openai@4.104.0(zod@3.25.76))
       merge-descriptors:
         specifier: ^1.0.1
         version: 1.0.3
@@ -688,6 +691,9 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
+  axios@1.12.2:
+    resolution: {integrity: sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==}
+
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
@@ -1000,6 +1006,15 @@ packages:
   finalhandler@1.3.1:
     resolution: {integrity: sha512-6BN9trH7bp3qvnrRyzsBz+g3lZxTNZTbVO2EV1CS0WIcDbawYVdYvGflME/9QP0h0pYlCDBCTjYa9nZzMDpyxQ==}
     engines: {node: '>= 0.8'}
+
+  follow-redirects@1.15.11:
+    resolution: {integrity: sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
 
   form-data-encoder@1.7.2:
     resolution: {integrity: sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==}
@@ -1594,6 +1609,9 @@ packages:
   proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
     engines: {node: '>= 0.10'}
+
+  proxy-from-env@1.1.0:
+    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
   pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
@@ -2477,6 +2495,14 @@ snapshots:
 
   asynckit@0.4.0: {}
 
+  axios@1.12.2(debug@4.4.3(supports-color@9.4.0)):
+    dependencies:
+      follow-redirects: 1.15.11(debug@4.4.3(supports-color@9.4.0))
+      form-data: 4.0.4
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
   balanced-match@1.0.2: {}
 
   base64-js@1.5.1: {}
@@ -2850,6 +2876,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  follow-redirects@1.15.11(debug@4.4.3(supports-color@9.4.0)):
+    optionalDependencies:
+      debug: 4.4.3(supports-color@9.4.0)
+
   form-data-encoder@1.7.2: {}
 
   form-data@4.0.4:
@@ -3059,7 +3089,7 @@ snapshots:
       jwa: 1.4.2
       safe-buffer: 5.2.1
 
-  langchain@0.3.36(@langchain/core@0.3.78(openai@4.104.0(zod@3.25.76)))(openai@4.104.0(zod@3.25.76)):
+  langchain@0.3.36(@langchain/core@0.3.78(openai@4.104.0(zod@3.25.76)))(axios@1.12.2(debug@4.4.3(supports-color@9.4.0)))(openai@4.104.0(zod@3.25.76)):
     dependencies:
       '@langchain/core': 0.3.78(openai@4.104.0(zod@3.25.76))
       '@langchain/openai': 0.3.17(@langchain/core@0.3.78(openai@4.104.0(zod@3.25.76)))
@@ -3073,6 +3103,8 @@ snapshots:
       uuid: 10.0.0
       yaml: 2.8.1
       zod: 3.25.76
+    optionalDependencies:
+      axios: 1.12.2(debug@4.4.3(supports-color@9.4.0))
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - '@opentelemetry/exporter-trace-otlp-proto'
@@ -3367,6 +3399,8 @@ snapshots:
     dependencies:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
+
+  proxy-from-env@1.1.0: {}
 
   pure-rand@6.1.0: {}
 

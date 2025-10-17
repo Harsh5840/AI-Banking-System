@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { createTransaction as buildLedgerTxn } from '../core/ledger';
 import { classifyCategory } from '../ai/fraud';
 import { prisma } from '../db/client';
+import { SYSTEM_INCOME_ACCOUNT_ID, SYSTEM_EXPENSE_ACCOUNT_ID } from '../config/env';
 
 import {
   createTransaction,
@@ -19,13 +20,49 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
     const { from, to, amount, description, type, timestamp: clientTimestamp } = req.body;
 
     // Validate required fields
-    if (!from || !to || !amount) {
-      return res.status(400).json({ error: 'Missing required fields: from, to, amount' });
+    if (!amount) {
+      return res.status(400).json({ error: 'Missing required field: amount' });
     }
 
     if (!["expense", "income", "transfer"].includes(type)) {
       return res.status(400).json({ error: "Invalid transaction type" });
     }
+
+    // Determine from/to accounts based on transaction type
+    let fromAccount: string;
+    let toAccount: string;
+
+    if (type === "expense") {
+      // Expense: User account (from) -> System expense account (to)
+      if (!from) {
+        return res.status(400).json({ error: 'Missing required field: from (user account)' });
+      }
+      if (!SYSTEM_EXPENSE_ACCOUNT_ID) {
+        return res.status(500).json({ error: 'System expense account not configured' });
+      }
+      fromAccount = from;
+      toAccount = SYSTEM_EXPENSE_ACCOUNT_ID;
+    } else if (type === "income") {
+      // Income: System income account (from) -> User account (to)
+      if (!to) {
+        return res.status(400).json({ error: 'Missing required field: to (user account)' });
+      }
+      if (!SYSTEM_INCOME_ACCOUNT_ID) {
+        return res.status(500).json({ error: 'System income account not configured' });
+      }
+      fromAccount = SYSTEM_INCOME_ACCOUNT_ID;
+      toAccount = to;
+    } else {
+      // Transfer: User account -> User account
+      if (!from || !to) {
+        return res.status(400).json({ error: 'Missing required fields: from, to' });
+      }
+      fromAccount = from;
+      toAccount = to;
+    }
+
+    // Log the account IDs for debugging
+    console.log('Creating transaction:', { type, from: fromAccount, to: toAccount, userId });
 
     const timestamp = clientTimestamp || new Date().toISOString();
 
@@ -43,8 +80,8 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
 
     const tx = buildLedgerTxn({
       userId,
-      from,
-      to,
+      from: fromAccount,
+      to: toAccount,
       amount: parseFloat(amount),
       description,
       timestamp,
@@ -58,6 +95,16 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Transaction creation failed:', error);
     console.error('Error details:', error.message, error.stack);
+    
+    // Handle specific errors
+    if (error.message?.includes('account not found')) {
+      return res.status(404).json({ 
+        error: 'Account not found', 
+        details: error.message,
+        hint: 'Please ensure both "from" and "to" accounts exist before creating a transaction'
+      });
+    }
+    
     return res.status(500).json({ error: 'Failed to add transaction', details: error.message });
   }
 };

@@ -13,6 +13,21 @@ export async function addTransactionFromCore(transaction: any /* LedgerXTransact
   });
   if (existing) throw new Error(`Duplicate ledger hash: ${debit.hash}`);
 
+  // Validate that accounts exist
+  const debitAccount = await prisma.account.findUnique({
+    where: { id: debit.account },
+  });
+  if (!debitAccount) {
+    throw new Error(`Debit account not found: ${debit.account}`);
+  }
+
+  const creditAccount = await prisma.account.findUnique({
+    where: { id: credit.account },
+  });
+  if (!creditAccount) {
+    throw new Error(`Credit account not found: ${credit.account}`);
+  }
+
   const txData: Prisma.TransactionCreateInput = {
     user: { connect: { id: debit.userId } },
     amount: debit.amount,
