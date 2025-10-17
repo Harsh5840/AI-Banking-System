@@ -12,6 +12,9 @@ import { Github, Mail } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
+import { config } from "@/lib/config"
+import axios from "axios"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -24,30 +27,49 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate login
-    setTimeout(() => {
-      if (email === "admin@ledgerx.com") {
-        toast({
-          title: "Welcome back, Admin!",
-          description: "Redirecting to admin dashboard...",
-        })
+    try {
+      // Real API call to backend
+      const response = await axios.post(API_ENDPOINTS.AUTH.LOGIN, {
+        email,
+        password,
+      })
+
+      const { token, user } = response.data
+
+      // Save token to localStorage
+      localStorage.setItem("token", token)
+      localStorage.setItem("user", JSON.stringify(user))
+
+      toast({
+        title: user.role === "ADMIN" ? "Welcome back, Admin!" : "Welcome back!",
+        description: "Login successful. Redirecting...",
+      })
+
+      // Redirect based on role
+      if (user.role === "ADMIN") {
         router.push("/admin/dashboard")
       } else {
-        toast({
-          title: "Welcome back!",
-          description: "Redirecting to your dashboard...",
-        })
         router.push("/dashboard")
       }
+    } catch (error: any) {
+      console.error("Login error:", error)
+      toast({
+        title: "Login Failed",
+        description: error.response?.data?.error || "Invalid email or password",
+        variant: "destructive",
+      })
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleOAuthLogin = (provider: string) => {
-    toast({
-      title: `${provider} Login`,
-      description: "OAuth integration would be implemented here",
-    })
+    // Redirect to backend OAuth endpoint
+    if (provider === "Google") {
+      window.location.href = config.auth.google
+    } else if (provider === "GitHub") {
+      window.location.href = config.auth.github
+    }
   }
 
   return (

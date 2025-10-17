@@ -22,7 +22,30 @@ export async function addTransactionFromCore(transaction: any /* LedgerXTransact
     isFlagged: debit.isSuspicious ?? false,
     reasons: transaction.reasons ?? "",
     ledgerEntries: {
-      create: [debit, credit],
+      create: [
+        {
+          id: debit.id,
+          userId: debit.userId,
+          accountId: debit.account,
+          type: EntryType.debit,
+          amount: debit.amount,
+          category: debit.category,
+          timestamp: new Date(debit.timestamp),
+          prevHash: debit.prevHash || "",
+          hash: debit.hash,
+        },
+        {
+          id: credit.id,
+          userId: credit.userId,
+          accountId: credit.account,
+          type: EntryType.credit,
+          amount: credit.amount,
+          category: credit.category,
+          timestamp: new Date(credit.timestamp),
+          prevHash: credit.prevHash || "",
+          hash: credit.hash,
+        },
+      ],
     },
   };
 

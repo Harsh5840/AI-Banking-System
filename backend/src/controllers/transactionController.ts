@@ -16,14 +16,18 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized: User ID missing' });
     }
 
-    const input = req.body;
-    const { description, type } = input;
+    const { from, to, amount, description, type, timestamp: clientTimestamp } = req.body;
+
+    // Validate required fields
+    if (!from || !to || !amount) {
+      return res.status(400).json({ error: 'Missing required fields: from, to, amount' });
+    }
 
     if (!["expense", "income", "transfer"].includes(type)) {
       return res.status(400).json({ error: "Invalid transaction type" });
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = clientTimestamp || new Date().toISOString();
 
     let debitCategory = "others";
     let creditCategory = "others";
@@ -37,9 +41,12 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
       creditCategory = "transfer";
     }
 
-    const tx = await buildLedgerTxn({
-      ...input,
+    const tx = buildLedgerTxn({
       userId,
+      from,
+      to,
+      amount: parseFloat(amount),
+      description,
       timestamp,
       debitCategory,
       creditCategory,
@@ -48,9 +55,10 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
     const created = await createTransaction(tx);
 
     return res.status(201).json({ message: 'Transaction added successfully', transaction: created });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Transaction creation failed:', error);
-    return res.status(500).json({ error: 'Failed to add transaction' });
+    console.error('Error details:', error.message, error.stack);
+    return res.status(500).json({ error: 'Failed to add transaction', details: error.message });
   }
 };
 
