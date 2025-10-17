@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { createTransaction as buildLedgerTxn } from '../core/ledger';
-import { classifyCategory } from '../ai/fraud.js';
+import { classifyCategory } from '../ai/fraud';
 import { prisma } from '../db/client';
 
 import {
