@@ -71,8 +71,10 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
 
     if (type === "expense") {
       debitCategory = classifyCategory(description);
+      console.log(`📊 Classified expense "${description}" as: ${debitCategory}`);
     } else if (type === "income") {
       creditCategory = classifyCategory(description);
+      console.log(`📊 Classified income "${description}" as: ${creditCategory}`);
     } else if (type === "transfer") {
       debitCategory = "transfer";
       creditCategory = "transfer";
@@ -138,23 +140,38 @@ export const handleGetAllTransactions = async (req: Request, res: Response) => {
       return res.json([]);
     }
 
-    const enhancedTransactions = transactions.map((tx: any) => ({
-      id: tx.id,
-      description: tx.description || 'No description',
-      amount: tx.amount,
-      category: tx.category,
-      timestamp: tx.timestamp.toISOString(),
-      date: tx.timestamp.toISOString().split('T')[0],
-      riskScore: tx.riskScore || Math.floor(Math.random() * 100),
-      status: 'completed',
-      canReverse: tx.amount < 0 && !tx.parentId,
-      hash: `tx_${tx.id.slice(0, 8)}`,
-      user: role === 'ADMIN' ? {
-        id: tx.user?.id || tx.userId,
-        name: tx.user?.name || 'Unknown User',
-        email: tx.user?.email || 'unknown@example.com'
-      } : undefined
-    }));
+    const enhancedTransactions = transactions.map((tx: any) => {
+      // Determine transaction type based on amount
+      let type = 'transfer';
+      if (tx.category === 'transfer') {
+        type = 'transfer';
+      } else if (tx.amount > 0) {
+        type = 'income';
+      } else if (tx.amount < 0) {
+        type = 'expense';
+      }
+
+      return {
+        id: tx.id,
+        description: tx.description || 'No description',
+        amount: Math.abs(tx.amount), // Always show positive amount
+        category: tx.category,
+        type: type, // Add transaction type
+        timestamp: tx.timestamp.toISOString(),
+        createdAt: tx.timestamp.toISOString(), // Add createdAt for frontend compatibility
+        date: tx.timestamp.toISOString().split('T')[0],
+        riskScore: tx.riskScore || 0,
+        isFlagged: tx.isFlagged || false,
+        status: 'completed',
+        canReverse: tx.amount < 0 && !tx.parentId,
+        hash: `tx_${tx.id.slice(0, 8)}`,
+        user: role === 'ADMIN' ? {
+          id: tx.user?.id || tx.userId,
+          name: tx.user?.name || 'Unknown User',
+          email: tx.user?.email || 'unknown@example.com'
+        } : undefined
+      };
+    });
 
     return res.json(enhancedTransactions);
   } catch (error) {

@@ -1,38 +1,28 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Edit3, Trash2, Eye, Wallet, Building, PiggyBank, BarChart3, Shield, Zap, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { Loader2, Plus, Edit3, Trash2, Wallet, Building, PiggyBank, BarChart3, Shield, Zap, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Navbar } from '@/components/layout/navbar';
 
 type AccountType = 'SAVINGS' | 'WALLET' | 'BUSINESS';
 
-interface LedgerEntry {
-  id: string;
-  accountId: string;
-  amount: number;
-  type: string;
-  description: string;
-  createdAt: string;
-}
 interface Account {
   id: string;
   name: string;
   type: AccountType;
   createdAt: string;
   userId: string;
-  entries?: LedgerEntry[]; // 👈 Add this to support .entries
 }
 
 interface CreateAccountData {
@@ -51,16 +41,13 @@ const AccountsPage = () => {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Create form state
   const [newAccount, setNewAccount] = useState<CreateAccountData>({
     name: '',
     type: 'WALLET'
   });
 
-  // Edit form state
   const [editName, setEditName] = useState('');
 
-  // Get JWT token from localStorage or cookies
   const getAuthToken = () => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('token') || '';
@@ -68,7 +55,6 @@ const AccountsPage = () => {
     return '';
   };
 
-  // Configure axios with auth token
   const getAxiosConfig = () => {
     const token = getAuthToken();
     return {
@@ -79,13 +65,12 @@ const AccountsPage = () => {
     };
   };
 
-  // Fetch user's accounts
   const fetchAccounts = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await axios.get('http://localhost:5000/api/accounts/me', getAxiosConfig());
-      // setAccounts(Array.isArray(response.data) ? response.data : response.data.accounts);
+      setAccounts(Array.isArray(response.data) ? response.data : response.data.accounts || []);
     } catch (err) {
       const errorMessage = axios.isAxiosError(err) 
         ? err.response?.data?.message || err.message 
@@ -101,7 +86,6 @@ const AccountsPage = () => {
     }
   };
 
-  // Create new account
   const handleCreateAccount = async () => {
     if (!newAccount.name.trim()) {
       toast({
@@ -116,11 +100,7 @@ const AccountsPage = () => {
       setCreateLoading(true);
       const response = await axios.post('http://localhost:5000/api/accounts', newAccount, getAxiosConfig());
 
-      setAccounts(prev => [
-        ...(Array.isArray(prev) ? prev : []),
-        response.data.account
-      ]);
-      // <-- Add this line
+      setAccounts(prev => [...prev, response.data.account]);
       setNewAccount({ name: '', type: 'WALLET' });
       setCreateModalOpen(false);
       
@@ -142,7 +122,6 @@ const AccountsPage = () => {
     }
   };
 
-  // Update account name
   const handleUpdateAccount = async () => {
     if (!editingAccount || !editName.trim()) {
       toast({
@@ -186,7 +165,6 @@ const AccountsPage = () => {
     }
   };
 
-  // Delete account
   const handleDeleteAccount = async (accountId: string) => {
     try {
       setDeleteLoading(accountId);
@@ -212,7 +190,6 @@ const AccountsPage = () => {
     }
   };
 
-  // Get account type icon and styling
   const getAccountTypeConfig = (type: AccountType) => {
     switch (type) {
       case 'SAVINGS':
@@ -240,7 +217,6 @@ const AccountsPage = () => {
     }
   };
 
-  // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -249,98 +225,75 @@ const AccountsPage = () => {
     });
   };
 
-  // Load accounts on component mount
   useEffect(() => {
     fetchAccounts();
   }, []);
 
   return (
     <>
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950">
-      <Sidebar userRole="USER" />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Navbar userRole="USER" userName="User" />
-        <main className="flex-1 overflow-y-auto p-6">
-          {/* Header Section */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-8">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-slate-900 dark:bg-white rounded-xl">
-                    <Wallet className="h-6 w-6 text-white dark:text-slate-900" />
-                  </div>
-                    <Wallet className="h-6 w-6 text-white dark:text-slate-900" />
-                  </div>
-                  <div>
-                    <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                      Financial Accounts
-                    </h1>
-                    <p className="text-slate-600 dark:text-slate-400 text-lg">
-                      Manage your financial accounts and track your investments
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-6">
-                  <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 px-3 py-1">
-                    <Shield className="w-3 h-3 mr-1" />
-                    Bank-grade Security
-                  </Badge>
-                  <Badge className="bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 px-3 py-1">
-                    <BarChart3 className="w-3 h-3 mr-1" />
-                    Real-time Sync
-                  </Badge>
-                </div>
+      <div className="flex h-screen bg-slate-50 dark:bg-slate-950">
+        <Sidebar userRole="USER" />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Navbar userRole="USER" userName="User" />
+          <main className="flex-1 overflow-y-auto p-6">
+            {/* Header */}
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
+                  Financial Accounts
+                </h1>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Manage your financial accounts
+                </p>
               </div>
               
               <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
                 <DialogTrigger asChild>
-                  <Button size="lg" className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                    <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                  <Button size="lg" className="bg-slate-900 dark:bg-white text-white dark:text-slate-900">
+                    <Plus className="h-5 w-5 mr-2" />
                     Create Account
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                <DialogContent className="bg-white dark:bg-slate-900">
                   <DialogHeader>
-                    <DialogTitle className="text-slate-900 dark:text-white">Create New Account</DialogTitle>
-                    <DialogDescription className="text-slate-600 dark:text-slate-400">
-                      Add a new financial account to track your transactions and investments.
+                    <DialogTitle>Create New Account</DialogTitle>
+                    <DialogDescription>
+                      Add a new financial account to track your transactions.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="grid gap-6 py-4">
+                  <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name" className="text-slate-700 dark:text-slate-300 font-medium">Account Name</Label>
+                      <Label htmlFor="name">Account Name</Label>
                       <Input
                         id="name"
                         value={newAccount.name}
                         onChange={(e) => setNewAccount(prev => ({ ...prev, name: e.target.value }))}
                         placeholder="Enter account name"
-                        className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="type" className="text-slate-700 dark:text-slate-300 font-medium">Account Type</Label>
+                      <Label htmlFor="type">Account Type</Label>
                       <Select
                         value={newAccount.type}
                         onValueChange={(value: AccountType) => setNewAccount(prev => ({ ...prev, type: value }))}
                       >
-                        <SelectTrigger className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                        <SelectTrigger>
                           <SelectValue placeholder="Select account type" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-                          <SelectItem value="WALLET" className="hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <SelectContent>
+                          <SelectItem value="WALLET">
                             <div className="flex items-center gap-2">
                               <Wallet className="h-4 w-4 text-purple-500" />
                               Wallet
                             </div>
                           </SelectItem>
-                          <SelectItem value="SAVINGS" className="hover:bg-slate-50 dark:hover:bg-slate-800">
+                          <SelectItem value="SAVINGS">
                             <div className="flex items-center gap-2">
                               <PiggyBank className="h-4 w-4 text-emerald-500" />
                               Savings
                             </div>
                           </SelectItem>
-                          <SelectItem value="BUSINESS" className="hover:bg-slate-50 dark:hover:bg-slate-800">
+                          <SelectItem value="BUSINESS">
                             <div className="flex items-center gap-2">
                               <Building className="h-4 w-4 text-blue-500" />
                               Business
@@ -350,20 +303,17 @@ const AccountsPage = () => {
                       </Select>
                     </div>
                   </div>
-                  
                   <DialogFooter>
                     <Button
                       variant="outline"
                       onClick={() => setCreateModalOpen(false)}
                       disabled={createLoading}
-                      className="border-slate-200 dark:border-slate-700"
                     >
                       Cancel
                     </Button>
                     <Button 
                       onClick={handleCreateAccount} 
                       disabled={createLoading}
-                      className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100"
                     >
                       {createLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                       Create Account
@@ -373,72 +323,155 @@ const AccountsPage = () => {
               </Dialog>
             </div>
 
-            {/* Stats Section */}
-            {accounts.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Card className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Accounts</p>
-                        <p className="text-3xl font-bold text-slate-900 dark:text-white">{accounts.length}</p>
-                      </div>
-                      <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                        <Wallet className="h-6 w-6 text-slate-600 dark:text-slate-400" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+            {/* Loading */}
+            {loading && (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-slate-600" />
+              </div>
+            )}
 
-                <Card className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Active Status</p>
-                        <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">Online</p>
-                      </div>
-                      <div className="p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-xl">
-                        <Zap className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+            {/* Error */}
+            {error && !loading && (
+              <Card className="bg-red-50 border-red-200">
+                <CardContent className="p-6">
+                  <p className="text-red-600">{error}</p>
+                </CardContent>
+              </Card>
+            )}
 
-                <Card className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Growth</p>
-                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">+12.5%</p>
-                      </div>
-                      <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-xl">
-                        <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                      </div>
+            {/* Empty State */}
+            {!loading && !error && accounts.length === 0 && (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <Wallet className="h-16 w-16 text-slate-400" />
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2">No Accounts Yet</h3>
+                      <p className="text-slate-600 mb-6">
+                        Create your first account to start managing your finances
+                      </p>
+                      <Button onClick={() => setCreateModalOpen(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Your First Account
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Accounts List */}
+            {!loading && !error && accounts.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {accounts.map((account) => {
+                  const typeConfig = getAccountTypeConfig(account.type);
+                  return (
+                    <Card key={account.id} className="hover:shadow-lg transition-all">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-3 ${typeConfig.color} rounded-xl text-white`}>
+                              {typeConfig.icon}
+                            </div>
+                            <div>
+                              <CardTitle className="text-lg">{account.name}</CardTitle>
+                              <Badge variant="outline" className="mt-1">
+                                {account.type}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="space-y-4">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Created</span>
+                          <span className="font-medium">{formatDate(account.createdAt)}</span>
+                        </div>
+
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Account ID</span>
+                          <span className="font-mono text-xs">{account.id.slice(-8)}</span>
+                        </div>
+
+                        <div className="flex gap-2 pt-4 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                              setEditingAccount(account);
+                              setEditName(account.name);
+                            }}
+                          >
+                            <Edit3 className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 text-red-600 border-red-200"
+                                disabled={deleteLoading === account.id}
+                              >
+                                {deleteLoading === account.id ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <>
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    Delete
+                                  </>
+                                )}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Account?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete "{account.name}" and all associated transactions.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteAccount(account.id)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete Account
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </main>
         </div>
       </div>
+
+      {/* Edit Dialog */}
       <Dialog open={!!editingAccount} onOpenChange={() => setEditingAccount(null)}>
-        <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+        <DialogContent className="bg-white dark:bg-slate-900">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 dark:text-white">Edit Account</DialogTitle>
-            <DialogDescription className="text-slate-600 dark:text-slate-400">
+            <DialogTitle>Edit Account</DialogTitle>
+            <DialogDescription>
               Update the name of your account.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name" className="text-slate-700 dark:text-slate-300 font-medium">Account Name</Label>
+              <Label htmlFor="edit-name">Account Name</Label>
               <Input
                 id="edit-name"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 placeholder="Enter account name"
-                className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
               />
             </div>
           </div>
@@ -447,14 +480,12 @@ const AccountsPage = () => {
               variant="outline"
               onClick={() => setEditingAccount(null)}
               disabled={updateLoading}
-              className="border-slate-200 dark:border-slate-700"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleUpdateAccount} 
               disabled={updateLoading}
-              className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100"
             >
               {updateLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Update Account
@@ -464,6 +495,6 @@ const AccountsPage = () => {
       </Dialog>
     </>
   );
-}
+};
 
 export default AccountsPage;
