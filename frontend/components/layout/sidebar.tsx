@@ -83,21 +83,17 @@ export function Sidebar({ userRole }: SidebarProps) {
       href: "/admin/analytics",
       icon: BarChart3,
     },
-    {
-      title: "Fraud Check",
-      href: "/admin/fraud",
-      icon: Shield,
-    },
-    {
-      title: "Risk Assessment",
-      href: "/admin/risk",
-      icon: AlertTriangle,
-    },
-    {
-      title: "NLP Assistant",
-      href: "/admin/nlp",
-      icon: Brain,
-    },
+    // Fraud Check and Risk Assessment pages not yet implemented
+    // {
+    //   title: "Fraud Check",
+    //   href: "/admin/fraud",
+    //   icon: Shield,
+    // },
+    // {
+    //   title: "Risk Assessment",
+    //   href: "/admin/risk",
+    //   icon: AlertTriangle,
+    // },
   ]
 
   const navItems = userRole === "ADMIN" ? adminNavItems : userNavItems
