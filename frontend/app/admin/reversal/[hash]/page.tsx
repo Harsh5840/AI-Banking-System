@@ -280,27 +280,38 @@ export default function DetailedReversalPage() {
                 {transaction.canReverse ? (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="reason">Reason for Reversal *</Label>
+                      <Label htmlFor="reasonTextarea">Reason for Reversal *</Label>
                       <Textarea
-                        id="reason"
+                        id="reasonTextarea"
                         placeholder="Enter detailed reason for this reversal..."
                         value={reversalReason}
                         onChange={(e) => setReversalReason(e.target.value)}
                         rows={4}
                         className="resize-none"
+                        autoComplete="off"
                       />
-                      <p className="text-xs text-muted-foreground">This will be recorded in the audit log</p>
+                      <p className="text-xs text-muted-foreground">
+                        This will be recorded in the audit log ({reversalReason.length} characters)
+                      </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="confirm">Type "CONFIRM" to proceed *</Label>
+                      <Label htmlFor="confirmInput">Type "CONFIRM" to proceed *</Label>
                       <Input
-                        id="confirm"
-                        placeholder="CONFIRM"
+                        id="confirmInput"
+                        placeholder="Type CONFIRM here..."
                         value={confirmationCode}
-                        onChange={(e) => setConfirmationCode(e.target.value)}
-                        className="font-mono"
+                        onChange={(e) => setConfirmationCode(e.target.value.toUpperCase())}
+                        className="font-mono uppercase"
+                        autoComplete="off"
+                        spellCheck={false}
                       />
+                      {confirmationCode && confirmationCode !== "CONFIRM" && (
+                        <p className="text-xs text-red-500">Must type exactly "CONFIRM"</p>
+                      )}
+                      {confirmationCode === "CONFIRM" && (
+                        <p className="text-xs text-green-600">✓ Confirmation code correct</p>
+                      )}
                     </div>
 
                     {/* Reversal Preview */}

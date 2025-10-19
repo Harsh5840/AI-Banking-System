@@ -163,7 +163,7 @@ export const handleGetAllTransactions = async (req: Request, res: Response) => {
         riskScore: tx.riskScore || 0,
         isFlagged: tx.isFlagged || false,
         status: 'completed',
-        canReverse: tx.amount < 0 && !tx.parentId,
+        canReverse: !tx.parentId, // Allow reversing any non-reversed transaction
         hash: `tx_${tx.id.slice(0, 8)}`,
         user: role === 'ADMIN' ? {
           id: tx.user?.id || tx.userId,
