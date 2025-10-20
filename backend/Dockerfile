@@ -14,7 +14,7 @@ RUN pnpm install --frozen-lockfile
 # Copy the rest of the application
 COPY . .
 
-# Build TypeScript
+# Build TypeScript (prisma generate is now included in build script)
 RUN pnpm run build
 
 # Stage 2: Runtime

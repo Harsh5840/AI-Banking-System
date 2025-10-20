@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "build": "tsc -p . && tsc-alias"
+    "build": "prisma generate && tsc -p . && tsc-alias",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
