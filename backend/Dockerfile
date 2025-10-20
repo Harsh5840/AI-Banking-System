@@ -8,6 +8,9 @@ RUN npm install -g pnpm
 # Copy package files first for better caching
 COPY package.json pnpm-lock.yaml ./
 
+# Copy prisma schema (needed before install due to postinstall script)
+COPY prisma ./prisma
+
 # Install dependencies with pnpm (handles peer dependencies better)
 RUN pnpm install --frozen-lockfile
 
