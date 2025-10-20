@@ -1,34 +1,40 @@
-# --- Stage 1: Build ---
+# Stage 1: Build
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy root manifests for workspace install
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages ./packages
-
-# Copy frontend app
-COPY apps/frontend ./apps/frontend
-
-# Install pnpm + deps
+# Install pnpm
 RUN npm install -g pnpm
-RUN pnpm install --no-frozen-lockfile
 
-# Build Next.js app
-RUN pnpm --filter ledgerX-frontend build
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
 
-# --- Stage 2: Run ---
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy the rest of the application
+COPY . .
+
+# Build Next.js app (this will use environment variables from build args)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+RUN pnpm run build
+
+# Stage 2: Runtime
 FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Copy only production artifacts
-COPY --from=builder /app/apps/frontend/.next ./.next
-COPY --from=builder /app/apps/frontend/node_modules ./node_modules
-COPY --from=builder /app/apps/frontend/package.json ./package.json
-COPY --from=builder /app/apps/frontend/public ./public
-COPY --from=builder /app/apps/frontend/next.config.mjs ./next.config.mjs
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy necessary files from builder
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.mjs ./next.config.mjs
 
 EXPOSE 3000
 
