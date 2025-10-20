@@ -2,20 +2,33 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy backend files
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files first for better caching
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies with pnpm (handles peer dependencies better)
+RUN pnpm install --frozen-lockfile
+
+# Copy the rest of the application
 COPY . .
 
-# Install dependencies
-RUN npm install
-
 # Build TypeScript
-RUN npm run build
+RUN pnpm run build
 
 # Stage 2: Runtime
 FROM node:20-alpine AS runtime
 WORKDIR /app
 
-COPY --from=builder /app .
+# Install pnpm in runtime stage
+RUN npm install -g pnpm
+
+# Copy built application and dependencies from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
 
 ENV NODE_ENV=production
 EXPOSE 5000

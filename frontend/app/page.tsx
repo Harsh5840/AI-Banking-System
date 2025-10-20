@@ -20,70 +20,85 @@ export default function HomePage() {
   const featuresRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (typeof window === "undefined") return
+
     const ctx = gsap.context(() => {
-      // Floating background elements
+      // Floating background elements - reduce frequency and make smoother
       gsap.to(".floating-circle", {
-        y: "random(-20, 20)",
-        x: "random(-20, 20)",
-        duration: "random(3, 6)",
+        y: "random(-30, 30)",
+        x: "random(-30, 30)",
+        duration: "random(4, 8)",
         ease: "sine.inOut",
         repeat: -1,
         yoyo: true,
-        stagger: 0.5,
+        stagger: {
+          each: 0.8,
+          from: "random"
+        },
       })
 
-      // Hero animation
-      const tl = gsap.timeline()
+      // Hero animation with better timing
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
       tl.from(".hero-content > *", {
-        y: 50,
+        y: 30,
         opacity: 0,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: "power2.out",
+        duration: 1,
+        stagger: 0.15,
+        clearProps: "all" // Clean up after animation
       })
-      tl.from(
+      .from(
         ".hero-image",
         {
-          x: 100,
+          x: 50,
           opacity: 0,
-          duration: 1,
-          ease: "power2.out",
+          duration: 1.2,
+          clearProps: "all"
         },
-        "-=0.5",
+        "-=0.8",
       )
 
-      // Stats counter animation
+      // Stats counter animation with one-time trigger
+      const statsTriggered = { value: false }
       ScrollTrigger.create({
         trigger: statsRef.current,
         start: "top 80%",
+        once: true, // Only trigger once
         onEnter: () => {
-          gsap.from(".stat-number", {
-            textContent: 0,
-            duration: 2,
-            ease: "power2.out",
-            snap: { textContent: 1 },
-            stagger: 0.2,
-          })
+          if (!statsTriggered.value) {
+            statsTriggered.value = true
+            gsap.from(".stat-number", {
+              textContent: 0,
+              duration: 2.5,
+              ease: "power2.inOut",
+              snap: { textContent: 1 },
+              stagger: 0.15,
+            })
+          }
         },
       })
 
-      // Feature cards animation
+      // Feature cards animation with once trigger
       ScrollTrigger.create({
         trigger: featuresRef.current,
-        start: "top 80%",
+        start: "top 75%",
+        once: true, // Only trigger once
         onEnter: () => {
           gsap.from(".feature-card", {
-            y: 50,
+            y: 40,
             opacity: 0,
-            duration: 0.6,
+            duration: 0.8,
             stagger: 0.1,
-            ease: "power2.out",
+            ease: "power3.out",
+            clearProps: "all"
           })
         },
       })
     })
 
-    return () => ctx.revert()
+    return () => {
+      ctx.revert()
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+    }
   }, [])
 
   return (
@@ -257,72 +272,78 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="feature-card bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all duration-300 group">
-              <CardHeader>
-                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-4 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
-                  <BarChart3 className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+            <Card className="feature-card relative overflow-hidden bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-blue-950/30 border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <CardHeader className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
+                  <BarChart3 className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white">Real-time Analytics</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Real-time Analytics</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
                   Get instant insights into your financial data with live dashboards and customizable reports.
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="feature-card bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all duration-300 group">
-              <CardHeader>
-                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-4 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
-                  <Shield className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+            <Card className="feature-card relative overflow-hidden bg-gradient-to-br from-white to-green-50 dark:from-slate-900 dark:to-green-950/30 border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <CardHeader className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
+                  <Shield className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white">Enterprise Security</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">Enterprise Security</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
                   Bank-grade encryption and multi-layer security protocols protect your sensitive data.
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="feature-card bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all duration-300 group">
-              <CardHeader>
-                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-4 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
-                  <Zap className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+            <Card className="feature-card relative overflow-hidden bg-gradient-to-br from-white to-yellow-50 dark:from-slate-900 dark:to-yellow-950/30 border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <CardHeader className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
+                  <Zap className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white">AI-Powered Insights</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">AI-Powered Insights</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
                   Machine learning algorithms analyze patterns and provide predictive financial insights.
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="feature-card bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all duration-300 group">
-              <CardHeader>
-                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-4 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
-                  <Globe className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+            <Card className="feature-card relative overflow-hidden bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-purple-950/30 border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <CardHeader className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
+                  <Globe className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white">Global Compliance</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Global Compliance</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
                   Built-in compliance tools for regulations across 24+ countries and jurisdictions.
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="feature-card bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all duration-300 group">
-              <CardHeader>
-                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-4 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
-                  <Smartphone className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+            <Card className="feature-card relative overflow-hidden bg-gradient-to-br from-white to-pink-50 dark:from-slate-900 dark:to-pink-950/30 border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <CardHeader className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
+                  <Smartphone className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white">Mobile First</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">Mobile First</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
                   Native mobile apps with full feature parity for managing finances on the go.
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="feature-card bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all duration-300 group">
-              <CardHeader>
-                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-4 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
-                  <Users className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+            <Card className="feature-card relative overflow-hidden bg-gradient-to-br from-white to-indigo-50 dark:from-slate-900 dark:to-indigo-950/30 border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <CardHeader className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
+                  <Users className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white">Team Collaboration</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Team Collaboration</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
                   Role-based access controls and collaborative tools for financial teams.
                 </CardDescription>
