@@ -13,6 +13,8 @@ import { Github, Mail } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
+import { config } from "@/lib/config"
 
 function RegisterPageInner() {
   const [formData, setFormData] = useState({
@@ -33,7 +35,7 @@ function RegisterPageInner() {
     if (token) {
       localStorage.setItem("token", token);
       // Fetch user info using the token
-      axios.get("http://localhost:5000/api/users/me", {
+      axios.get(API_ENDPOINTS.AUTH.ME, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => {
@@ -75,7 +77,7 @@ function RegisterPageInner() {
 
     setIsLoading(true)
     try {
-      const res = await axios.post("http://localhost:5000/api/users/register", {
+      const res = await axios.post(API_ENDPOINTS.AUTH.REGISTER, {
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -181,13 +183,13 @@ function RegisterPageInner() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Link href="http://localhost:5000/api/auth/google">
+            <Link href={config.auth.google}>
               <Button variant="outline" className="w-full">
                 <Mail className="mr-2 h-4 w-4" />
                 Google
               </Button>
             </Link>
-            <Link href="http://localhost:5000/api/auth/github">
+            <Link href={config.auth.github}>
               <Button variant="outline" className="w-full">
                 <Github className="mr-2 h-4 w-4" />
                 GitHub

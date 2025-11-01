@@ -1,5 +1,7 @@
 "use client"
 
+
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -32,7 +34,7 @@ export default function ReversalHistoryPage() {
         }
 
         // Fetch all transactions and filter for reversals
-        const res = await fetch("http://localhost:5000/api/transactions/all", {
+        const res = await fetch(API_ENDPOINTS.TRANSACTIONS.ALL, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -278,3 +280,4 @@ export default function ReversalHistoryPage() {
     </div>
   )
 }
+

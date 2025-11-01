@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Navbar } from "@/components/layout/navbar"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 import {
   Search,
   Download,
@@ -172,7 +173,7 @@ export default function TransactionsPage() {
                 timestamp: formData.timestamp
               };
 
-      const response = await axios.post("http://localhost:5000/api/transactions/create", payload, {
+      const response = await axios.post(API_ENDPOINTS.TRANSACTIONS.CREATE, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -221,7 +222,7 @@ export default function TransactionsPage() {
         throw new Error("Missing JWT token");
       }
 
-      const res = await axios.get("http://localhost:5000/api/transactions/all", {
+      const res = await axios.get(API_ENDPOINTS.TRANSACTIONS.ALL, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -256,7 +257,7 @@ export default function TransactionsPage() {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        const res = await axios.get("http://localhost:5000/api/accounts/me", {
+        const res = await axios.get(API_ENDPOINTS.ACCOUNTS.ME, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setAccounts(Array.isArray(res.data) ? res.data : res.data.accounts);

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Navbar } from "@/components/layout/navbar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 import {
   Search,
   Download,
@@ -46,7 +47,7 @@ export default function AdminUsersPage() {
           return
         }
 
-        const res = await fetch("http://localhost:5000/api/users/all", {
+        const res = await fetch(API_ENDPOINTS.USERS.ALL, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

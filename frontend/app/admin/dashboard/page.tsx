@@ -1,5 +1,7 @@
 "use client"
 
+
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -21,7 +23,7 @@ export default function AdminDashboard() {
     setUsersLoading(true)
     const fetchUsers = async () => {
       const token = localStorage.getItem("token")
-      const res = await fetch("http://localhost:5000/api/users/all", {
+      const res = await fetch(API_ENDPOINTS.USERS.ALL, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -36,7 +38,7 @@ export default function AdminDashboard() {
     setTransactionsLoading(true)
     const fetchTransactions = async () => {
       const token = localStorage.getItem("token")
-      const res = await fetch("http://localhost:5000/api/transactions/all", {
+      const res = await fetch(API_ENDPOINTS.TRANSACTIONS.ALL, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -233,3 +235,4 @@ export default function AdminDashboard() {
     </div>
   )
 }
+

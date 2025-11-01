@@ -9,6 +9,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download, AlertTriangle, Utensils } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import {
   ResponsiveContainer,
   CartesianGrid,
@@ -56,25 +57,25 @@ export default function AnalyticsPage() {
         const { month, year } = getMonthYearForRange(timeRange);
 
         // Total Spending
-        const totalRes = await axios.get("http://localhost:5000/api/analytics/total", {
+        const totalRes = await axios.get(API_ENDPOINTS.ANALYTICS.TOTAL, {
           params: { month, year }, // userId removed
           ...config,
         });
         setTotal(totalRes.data.total);
         // Top Categories
-        const catRes = await axios.get("http://localhost:5000/api/analytics/top-categories", {
+        const catRes = await axios.get(API_ENDPOINTS.ANALYTICS.TOP_CATEGORIES, {
           params: { month, year }, // userId removed
           ...config,
         });
         setTopCategories(catRes.data.categories);
         // Monthly Trend (usually for all months, but you can filter if needed)
-        const trendRes = await axios.get("http://localhost:5000/api/analytics/monthly-trend", {
+        const trendRes = await axios.get(API_ENDPOINTS.ANALYTICS.MONTHLY_TREND, {
           params: {}, // userId removed
           ...config,
         });
         setMonthlyTrend(trendRes.data.trend);
         // Flagged/Risky
-        const flaggedRes = await axios.get("http://localhost:5000/api/analytics/flagged", {
+        const flaggedRes = await axios.get(API_ENDPOINTS.ANALYTICS.FLAGGED, {
           params: {}, // userId removed
           ...config,
         });

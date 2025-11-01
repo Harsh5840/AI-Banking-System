@@ -1,5 +1,7 @@
 "use client"
 
+
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -45,11 +47,11 @@ export default function AdminAnalyticsPage() {
       setError(null)
       try {
         // Fetch all users
-        const usersRes = await axios.get("http://localhost:5000/api/users/all", config)
+        const usersRes = await axios.get(API_ENDPOINTS.USERS.ALL, config)
         const users = usersRes.data
 
         // Fetch all transactions
-        const transactionsRes = await axios.get("http://localhost:5000/api/transactions/all", config)
+        const transactionsRes = await axios.get(API_ENDPOINTS.TRANSACTIONS.ALL, config)
         const transactions = transactionsRes.data
 
         // Calculate analytics
@@ -356,3 +358,4 @@ export default function AdminAnalyticsPage() {
     </div>
   )
 }
+

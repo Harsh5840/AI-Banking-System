@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Navbar } from "@/components/layout/navbar"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 import {
   TrendingUp,
   TrendingDown,
@@ -54,7 +55,7 @@ export default function UserDashboard() {
   useEffect(() => {
     async function fetchData() {
       const token = localStorage.getItem("token");
-      const txRes = await fetch("http://localhost:5000/api/transactions/all", {
+      const txRes = await fetch(API_ENDPOINTS.TRANSACTIONS.ALL, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -318,7 +319,7 @@ function AssistantCard() {
     setResponse(null)
     try {
       const token = localStorage.getItem("token")
-      const res = await fetch("http://localhost:5000/api/nlp/query", {
+      const res = await fetch(API_ENDPOINTS.NLP.QUERY, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

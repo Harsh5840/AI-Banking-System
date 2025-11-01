@@ -1,5 +1,7 @@
 "use client"
 
+
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 import type React from "react"
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -56,7 +58,7 @@ export default function NLPAssistantPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/nlp/query", {
+      const res = await fetch(API_ENDPOINTS.NLP.QUERY, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

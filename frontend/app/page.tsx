@@ -58,22 +58,33 @@ export default function HomePage() {
       )
 
       // Stats counter animation with one-time trigger
-      const statsTriggered = { value: false }
       ScrollTrigger.create({
         trigger: statsRef.current,
         start: "top 80%",
         once: true, // Only trigger once
         onEnter: () => {
-          if (!statsTriggered.value) {
-            statsTriggered.value = true
-            gsap.from(".stat-number", {
-              textContent: 0,
-              duration: 2.5,
-              ease: "power2.inOut",
-              snap: { textContent: 1 },
-              stagger: 0.15,
-            })
-          }
+          // Animate each stat number individually to handle decimals
+          document.querySelectorAll(".stat-number").forEach((el, index) => {
+            const target = el.getAttribute("data-target")
+            if (target) {
+              const isDecimal = target.includes(".")
+              gsap.to(el, {
+                textContent: parseFloat(target),
+                duration: 2.5,
+                delay: index * 0.15,
+                ease: "power2.inOut",
+                snap: isDecimal ? { textContent: 0.1 } : { textContent: 1 },
+                onUpdate: function() {
+                  const value = parseFloat(this.targets()[0].textContent)
+                  if (isDecimal) {
+                    el.textContent = value.toFixed(1)
+                  } else {
+                    el.textContent = Math.floor(value).toLocaleString()
+                  }
+                }
+              })
+            }
+          })
         },
       })
 
@@ -95,9 +106,10 @@ export default function HomePage() {
       })
     })
 
+    // Cleanup function
     return () => {
-      ctx.revert()
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+      ctx.revert() // Revert all GSAP animations
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill()) // Kill all ScrollTriggers
     }
   }, [])
 
@@ -172,51 +184,46 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="hero-content space-y-8">
               <div className="space-y-4">
-                <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700">
-                  <Zap className="w-3 h-3 mr-1" />
-                  Next-Gen FinTech Platform
+                <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                  <Shield className="w-3 h-3 mr-1" />
+                  Enterprise Banking Platform
                 </Badge>
                 <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white leading-tight">
-                  Financial Intelligence
-                  <span className="block text-slate-600 dark:text-slate-400">Redefined</span>
+                  AI-Powered Banking & Ledger Management System
                 </h1>
-                <p className="text-xl text-slate-600 dark:text-slate-400 max-w-lg">
-                  Experience the future of financial management with AI-powered insights, real-time analytics, and
-                  enterprise-grade security.
+                <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Professional-grade double-entry ledger system with real-time fraud detection, AI-powered analytics, 
+                  and enterprise-level transaction management. Built for financial institutions and businesses.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/register">
-                  <Button
-                    size="lg"
-                    className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 group"
-                  >
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
                     Start Free Trial
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-transparent"
-                >
-                  Watch Demo
-                </Button>
+                <Link href="/login">
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    Sign In
+                    <Lock className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
               </div>
 
-              <div className="flex items-center space-x-8 pt-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white">99.9%</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">Uptime</div>
+              <div className="flex items-center space-x-6 pt-4">
+                <div className="flex items-center space-x-2">
+                  <Shield className="h-5 w-5 text-green-500" />
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Bank-Grade Security</span>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white">$2.4B+</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">Processed</div>
+                <div className="flex items-center space-x-2">
+                  <Zap className="h-5 w-5 text-yellow-500" />
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Real-Time Processing</span>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white">50K+</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">Users</div>
+                <div className="flex items-center space-x-2">
+                  <BarChart3 className="h-5 w-5 text-blue-500" />
+                  <span className="text-sm text-slate-600 dark:text-slate-400">AI Analytics</span>
                 </div>
               </div>
             </div>
@@ -240,20 +247,20 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="stat-number text-4xl font-bold text-slate-900 dark:text-white mb-2">2400000</div>
-              <div className="text-slate-600 dark:text-slate-400">Transactions Processed</div>
+              <div className="stat-number text-4xl font-bold text-slate-900 dark:text-white mb-2" data-target="2400000">0</div>
+              <div className="text-slate-600 dark:text-slate-400">Transaction Volume ($M)</div>
             </div>
             <div className="text-center">
-              <div className="stat-number text-4xl font-bold text-slate-900 dark:text-white mb-2">50000</div>
-              <div className="text-slate-600 dark:text-slate-400">Active Users</div>
+              <div className="stat-number text-4xl font-bold text-slate-900 dark:text-white mb-2" data-target="50000">0</div>
+              <div className="text-slate-600 dark:text-slate-400">Accounts Managed</div>
             </div>
             <div className="text-center">
-              <div className="stat-number text-4xl font-bold text-slate-900 dark:text-white mb-2">99</div>
-              <div className="text-slate-600 dark:text-slate-400">% Uptime</div>
+              <div className="stat-number text-4xl font-bold text-slate-900 dark:text-white mb-2" data-target="99.9">0</div>
+              <div className="text-slate-600 dark:text-slate-400">% Uptime SLA</div>
             </div>
             <div className="text-center">
-              <div className="stat-number text-4xl font-bold text-slate-900 dark:text-white mb-2">24</div>
-              <div className="text-slate-600 dark:text-slate-400">Countries Served</div>
+              <div className="stat-number text-4xl font-bold text-slate-900 dark:text-white mb-2" data-target="24">0</div>
+              <div className="text-slate-600 dark:text-slate-400">7 Support</div>
             </div>
           </div>
         </div>
@@ -264,10 +271,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              Everything you need to manage finances
+              Enterprise Banking Features
             </h2>
             <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              From real-time analytics to AI-powered insights, LedgerX provides all the tools modern businesses need.
+              Professional-grade double-entry ledger system with AI fraud detection, real-time transaction processing, 
+              and comprehensive account management for financial institutions.
             </p>
           </div>
 
@@ -278,9 +286,9 @@ export default function HomePage() {
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
                   <BarChart3 className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Real-time Analytics</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Double-Entry Ledger</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Get instant insights into your financial data with live dashboards and customizable reports.
+                  Professional accounting with automatic debits/credits, multi-account transactions, and complete audit trails.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -291,9 +299,9 @@ export default function HomePage() {
                 <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
                   <Shield className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">Enterprise Security</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">AI Fraud Detection</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Bank-grade encryption and multi-layer security protocols protect your sensitive data.
+                  Real-time ML-powered fraud detection with risk scoring and automatic alerts for suspicious transactions.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -304,9 +312,9 @@ export default function HomePage() {
                 <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
                   <Zap className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">AI-Powered Insights</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">Transaction Reversal</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Machine learning algorithms analyze patterns and provide predictive financial insights.
+                  Comprehensive reversal system for error corrections with full audit trails and compliance tracking.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -317,9 +325,9 @@ export default function HomePage() {
                 <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
                   <Globe className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Global Compliance</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Multi-Account Management</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Built-in compliance tools for regulations across 24+ countries and jurisdictions.
+                  Manage unlimited accounts with role-based access control and cross-account transaction support.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -330,9 +338,9 @@ export default function HomePage() {
                 <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg">
                   <Smartphone className="h-7 w-7 text-white" />
                 </div>
-                <CardTitle className="text-slate-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">Mobile First</CardTitle>
+                <CardTitle className="text-slate-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">Real-Time Analytics</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Native mobile apps with full feature parity for managing finances on the go.
+                  Live dashboards with transaction monitoring, balance tracking, and customizable financial reports.
                 </CardDescription>
               </CardHeader>
             </Card>

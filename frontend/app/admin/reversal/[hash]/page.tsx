@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 
 export default function DetailedReversalPage() {
   const params = useParams()
@@ -40,7 +41,7 @@ export default function DetailedReversalPage() {
         }
 
         // Fetch all transactions and find the one with this hash
-        const res = await fetch("http://localhost:5000/api/transactions/all", {
+        const res = await fetch(API_ENDPOINTS.TRANSACTIONS.ALL, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -96,7 +97,7 @@ export default function DetailedReversalPage() {
 
     try {
       const token = localStorage.getItem("token")
-      const res = await fetch(`http://localhost:5000/api/reversal/${hash}/reverse`, {
+      const res = await fetch(API_ENDPOINTS.REVERSAL.REVERSE(hash), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

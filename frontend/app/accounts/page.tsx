@@ -14,6 +14,7 @@ import { Loader2, Plus, Edit3, Trash2, Wallet, Building, PiggyBank, BarChart3, S
 import { useToast } from '@/hooks/use-toast';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Navbar } from '@/components/layout/navbar';
+import { API_ENDPOINTS } from '@/lib/api-endpoints';
 
 type AccountType = 'SAVINGS' | 'WALLET' | 'BUSINESS';
 
@@ -69,7 +70,7 @@ const AccountsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get('http://localhost:5000/api/accounts/me', getAxiosConfig());
+      const response = await axios.get(API_ENDPOINTS.ACCOUNTS.ME, getAxiosConfig());
       setAccounts(Array.isArray(response.data) ? response.data : response.data.accounts || []);
     } catch (err) {
       const errorMessage = axios.isAxiosError(err) 
@@ -98,7 +99,7 @@ const AccountsPage = () => {
 
     try {
       setCreateLoading(true);
-      const response = await axios.post('http://localhost:5000/api/accounts', newAccount, getAxiosConfig());
+      const response = await axios.post(API_ENDPOINTS.ACCOUNTS.CREATE, newAccount, getAxiosConfig());
 
       setAccounts(prev => [...prev, response.data.account]);
       setNewAccount({ name: '', type: 'WALLET' });
@@ -134,7 +135,7 @@ const AccountsPage = () => {
 
     try {
       setUpdateLoading(true);
-      await axios.put(`http://localhost:5000/api/accounts/${editingAccount.id}`, { name: editName }, getAxiosConfig());
+      await axios.put(API_ENDPOINTS.ACCOUNTS.UPDATE(editingAccount.id), { name: editName }, getAxiosConfig());
 
       setAccounts(prev => 
         prev.map(account => 
@@ -168,7 +169,7 @@ const AccountsPage = () => {
   const handleDeleteAccount = async (accountId: string) => {
     try {
       setDeleteLoading(accountId);
-      await axios.delete(`http://localhost:5000/api/accounts/${accountId}`, getAxiosConfig());
+      await axios.delete(API_ENDPOINTS.ACCOUNTS.DELETE(accountId), getAxiosConfig());
 
       setAccounts(prev => prev.filter(account => account.id !== accountId));
       
@@ -498,3 +499,4 @@ const AccountsPage = () => {
 };
 
 export default AccountsPage;
+

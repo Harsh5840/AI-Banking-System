@@ -38,6 +38,9 @@ export const API_ENDPOINTS = {
   // Account endpoints
   ACCOUNTS: {
     ME: `${API_BASE_URL}/api/accounts/me`,
+    CREATE: `${API_BASE_URL}/api/accounts`,
+    UPDATE: (id: string) => `${API_BASE_URL}/api/accounts/${id}`,
+    DELETE: (id: string) => `${API_BASE_URL}/api/accounts/${id}`,
   },
 
   // Reversal endpoints
