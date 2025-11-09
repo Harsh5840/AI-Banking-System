@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ledgerx-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ledgerx
+      POSTGRES_PASSWORD: ledgerx_password
+      POSTGRES_DB: ledgerx
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledgerx"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ledgerx-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ledgerx-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://ledgerx:ledgerx_password@postgres:5432/ledgerx
+      PORT: 5000
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-min-32-chars-change-in-production}
+      CORS_ORIGIN: http://localhost:3000,http://frontend:3000
+      BACKEND_URL: http://localhost:5000
+      FRONTEND_URL: http://localhost:3000
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      HUGGINGFACE_API_TOKEN: ${HUGGINGFACE_API_TOKEN}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      RISK_THRESHOLD: 50
+      HIGH_AMOUNT_THRESHOLD: 100000
+      TOTAL_RISK_THRESHOLD: 60
+      RULE_FLAG_THRESHOLD: 40
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ledgerx-network
+    volumes:
+      - ./backend/prisma:/app/prisma
+
+  # Frontend Web App
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ledgerx-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000
+      NEXT_PUBLIC_WS_URL: ws://localhost:5000
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-nextauth-secret-change-in-production}
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ledgerx-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  ledgerx-network:
+    driver: bridge
