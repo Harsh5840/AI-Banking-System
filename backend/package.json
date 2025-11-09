@@ -9,6 +9,8 @@
     "start": "node dist/server.js",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run src/**/*.test.ts",
+    "test:integration": "vitest run tests/integration/**/*.test.ts",
     "build": "prisma generate && tsc -p . && tsc-alias",
     "postinstall": "prisma generate"
   },
@@ -52,6 +54,9 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.3",
@@ -60,8 +65,11 @@
     "@types/passport-github": "^1.1.12",
     "@types/passport-github2": "^1.2.9",
     "@types/passport-google-oauth20": "^2.0.16",
+    "@types/supertest": "^6.0.3",
     "@vitest/coverage-v8": "^1.0.0",
+    "jsdom": "^27.1.0",
     "prisma": "^6.2.0",
+    "supertest": "^7.1.4",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.8.3",

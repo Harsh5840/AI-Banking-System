@@ -43,3 +43,5 @@ app.use((err: any, req: express.Request, res: express.Response, _next: express.N
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   });
+
+export { app };

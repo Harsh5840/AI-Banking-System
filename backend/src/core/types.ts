@@ -7,3 +7,14 @@ export interface LedgerEntry {
   isReversal?: boolean;
   [key: string]: any;
 }
+
+export enum AccountType {
+  SAVINGS = 'savings',
+  CHECKING = 'checking',
+  BUSINESS = 'business',
+}
+
+export enum TransactionType {
+  CREDIT = 'credit',
+  DEBIT = 'debit',
+}

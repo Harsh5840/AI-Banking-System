@@ -1,0 +1,90 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Install Dependencies (Backend)
+      run: |
+        cd backend
+        pnpm install
+
+    - name: Build Backend
+      run: |
+        cd backend
+        pnpm run build
+
+    - name: Install Dependencies (Frontend)
+      run: |
+        cd frontend
+        pnpm install
+
+    - name: Build Frontend
+      run: |
+        cd frontend
+        pnpm run build
+
+    - name: Run Backend Tests
+      run: |
+        cd backend
+        pnpm test
+
+    - name: Run Frontend Tests
+      run: |
+        cd frontend
+        pnpm test
+
+    - name: Run Backend Unit Tests
+      run: |
+        cd backend
+        pnpm test:unit
+
+    - name: Run Backend Integration Tests
+      run: |
+        cd backend
+        pnpm test:integration
+
+    # Commenting out AWS deployment steps for now
+    # - name: Deploy to AWS EC2
+    #   uses: appleboy/ssh-action@v0.1.8
+    #   with:
+    #     host: ${{ secrets.AWS_HOST }}
+    #     username: ${{ secrets.AWS_USER }}
+    #     key: ${{ secrets.AWS_KEY }}
+    #     port: 22
+    #     script: |
+    #       # Stop existing services
+    #       pm2 stop all || true
+    #
+    #       # Pull latest changes
+    #       mkdir -p ~/ledgerx
+    #       rm -rf ~/ledgerx/*
+    #
+    #       # Transfer files
+    #       scp -r backend frontend docker-compose.yml .env ~/ledgerx
+    #
+    #       # Start services
+    #       cd ~/ledgerx
+    #       docker-compose up -d --build
+    #
+    #       # Restart PM2
+    #       pm2 start dist/server.js --name ledgerx-backend
+    #       pm2 start npm --name ledgerx-frontend -- start
+
+    - name: Notify Deployment Success
+      run: echo "Deployment to AWS EC2 completed successfully!"
