@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Github, Mail } from "lucide-react"
+import { Mail } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
@@ -182,17 +182,11 @@ function RegisterPageInner() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <Link href={config.auth.google}>
               <Button variant="outline" className="w-full">
                 <Mail className="mr-2 h-4 w-4" />
                 Google
-              </Button>
-            </Link>
-            <Link href={config.auth.github}>
-              <Button variant="outline" className="w-full">
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
               </Button>
             </Link>
           </div>

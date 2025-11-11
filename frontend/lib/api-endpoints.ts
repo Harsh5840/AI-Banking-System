@@ -7,7 +7,7 @@ export const API_ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/api/users/login`,
     ME: `${API_BASE_URL}/api/users/me`,
     GOOGLE: `${API_BASE_URL}/api/auth/google`,
-    GITHUB: `${API_BASE_URL}/api/auth/github`,
+    // GITHUB removed
   },
   
   // User endpoints

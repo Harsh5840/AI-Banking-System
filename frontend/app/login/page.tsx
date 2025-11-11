@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Github, Mail } from "lucide-react"
+import { Mail } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -125,14 +125,10 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" onClick={() => handleOAuthLogin("Google")}>
+          <div className="grid grid-cols-1 gap-4">
+            <Button variant="outline" onClick={() => handleOAuthLogin("Google") }>
               <Mail className="mr-2 h-4 w-4" />
               Google
-            </Button>
-            <Button variant="outline" onClick={() => handleOAuthLogin("GitHub")}>
-              <Github className="mr-2 h-4 w-4" />
-              GitHub
             </Button>
           </div>
 

@@ -40,20 +40,7 @@ router.get(
 // ==============================
 // 🟣 GITHUB AUTH ROUTES
 // ==============================
-
-// Step 1: Redirect user to GitHub OAuth
-router.get("/github", passport.authenticate("github", { scope: ["user:email"] }));
-
-// Step 2: GitHub redirects to callback
-router.get(
-  "/github/callback",
-  passport.authenticate("github", { session: false, failureRedirect: "/login" }),
-  (req: Request, res: Response) => {
-    const user = req.user as any;
-    const token = signToken(user);
-    res.redirect(`${process.env.FRONTEND_URL}/oauth?token=${token}`);
-  }
-);
+// GitHub OAuth removed — using Google only
 
 // ==============================
 // 🚪 LOGOUT (optional since JWT is stateless)
