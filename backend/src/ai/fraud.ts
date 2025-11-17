@@ -77,7 +77,14 @@ export function classifyCategory(description?: string, amount?: number): string 
     desc.includes('kfc') ||
     desc.includes('domino') ||
     desc.includes('grocery') ||
-    desc.includes('supermarket')
+    desc.includes('supermarket') ||
+    desc.includes('delivery') ||
+    desc.includes('takeout') ||
+    desc.includes('meal') ||
+    desc.includes('foodpanda') ||
+    desc.includes('ubereats') ||
+    desc.includes('swiggy') ||
+    desc.includes('zomato')
   ) {
     return 'food';
   }

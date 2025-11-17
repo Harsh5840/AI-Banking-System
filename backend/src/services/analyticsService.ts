@@ -18,13 +18,14 @@ type Filters = z.infer<typeof FiltersSchema>;
 
 // ✅ Total Spending Summary
 export const getTotalSpendingWithFilters = async (
-  filters: Filters
+  filters: Filters & { accountId?: string }
 ): Promise<number> => {
   const validated = FiltersSchema.parse(filters);
-  const { userId, category, month, year } = validated;
+  const { userId, category, month, year, accountId } = validated;
 
   const where: any = { type: "debit" };
   if (userId) where.userId = userId;
+  if (accountId) where.account = accountId;
   if (category) where.category = category;
 
   if (month !== undefined && year !== undefined) {
@@ -43,14 +44,15 @@ export const getTotalSpendingWithFilters = async (
 
 // ✅ Top Spending Categories
 export const getTopCategoriesWithFilters = async (
-  filters: Filters,
+  filters: Filters & { accountId?: string },
   limit: number = 3
 ): Promise<{ category: string; total: number }[]> => {
   const validated = FiltersSchema.parse(filters);
-  const { userId, month, year } = validated;
+  const { userId, month, year, accountId } = validated;
 
   const where: any = { type: "debit" };
   if (userId) where.userId = userId;
+  if (accountId) where.account = accountId;
 
   if (month !== undefined && year !== undefined) {
     const start = new Date(year, month, 1);

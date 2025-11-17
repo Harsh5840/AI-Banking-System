@@ -76,8 +76,10 @@ export default function UserDashboard() {
 
       setTransactions(txData);
 
-      // Balance = sum of all transaction amounts
-      const totalBalance = txData.reduce((acc: number, tx: Transaction) => acc + tx.amount, 0);
+      // Balance: sum only for the current account (assume accountId is available)
+      const accountId = localStorage.getItem("accountId");
+      const filteredTx = accountId ? txData.filter((tx: Transaction) => tx.accountId === accountId) : txData;
+      const totalBalance = filteredTx.reduce((acc: number, tx: Transaction) => acc + tx.amount, 0);
       setBalance(totalBalance);
 
       // Category Breakdown
