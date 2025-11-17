@@ -9,6 +9,7 @@ import { LedgerEntry } from "../core/ledger";
 
 const FiltersSchema = z.object({
   userId: z.string().optional(),
+  accountId: z.string().optional(), // <-- Added for account filtering
   category: z.string().optional(),
   month: z.number().min(0).max(11).optional(), // JS months: 0–11
   year: z.number().min(1970).max(2100).optional(),
