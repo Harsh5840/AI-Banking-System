@@ -10,9 +10,14 @@ import {
   getAllTransactions,
 } from '../services/transactionService';
 
+import { transactionQueue } from '../queues/transaction.queue';
+
+
 export const handleCreateTransaction = async (req: Request, res: Response) => {
   try {
     const { id: userId } = req.user!;
+    const idempotencyKey = req.headers['idempotency-key'] as string; // Optional but recommended
+
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized: User ID missing' });
     }
@@ -20,8 +25,8 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
     const { from, to, amount, description, type, timestamp: clientTimestamp } = req.body;
 
     // Validate required fields
-    if (!amount) {
-      return res.status(400).json({ error: 'Missing required field: amount' });
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
     }
 
     if (!["expense", "income", "transfer"].includes(type)) {
@@ -33,81 +38,66 @@ export const handleCreateTransaction = async (req: Request, res: Response) => {
     let toAccount: string;
 
     if (type === "expense") {
-      // Expense: User account (from) -> System expense account (to)
-      if (!from) {
-        return res.status(400).json({ error: 'Missing required field: from (user account)' });
-      }
-      if (!SYSTEM_EXPENSE_ACCOUNT_ID) {
-        return res.status(500).json({ error: 'System expense account not configured' });
-      }
+      if (!from) return res.status(400).json({ error: 'Missing from account' });
       fromAccount = from;
-      toAccount = SYSTEM_EXPENSE_ACCOUNT_ID;
+      toAccount = SYSTEM_EXPENSE_ACCOUNT_ID!; // Ensure env is checked
     } else if (type === "income") {
-      // Income: System income account (from) -> User account (to)
-      if (!to) {
-        return res.status(400).json({ error: 'Missing required field: to (user account)' });
-      }
-      if (!SYSTEM_INCOME_ACCOUNT_ID) {
-        return res.status(500).json({ error: 'System income account not configured' });
-      }
-      fromAccount = SYSTEM_INCOME_ACCOUNT_ID;
+      if (!to) return res.status(400).json({ error: 'Missing to account' });
+      fromAccount = SYSTEM_INCOME_ACCOUNT_ID!;
       toAccount = to;
     } else {
-      // Transfer: User account -> User account
-      if (!from || !to) {
-        return res.status(400).json({ error: 'Missing required fields: from, to' });
-      }
+      if (!from || !to) return res.status(400).json({ error: 'Missing accounts' });
       fromAccount = from;
       toAccount = to;
     }
-
-    // Log the account IDs for debugging
-    console.log('Creating transaction:', { type, from: fromAccount, to: toAccount, userId });
 
     const timestamp = clientTimestamp || new Date().toISOString();
 
-    let debitCategory = "others";
-    let creditCategory = "others";
-
-    if (type === "expense") {
-      debitCategory = classifyCategory(description);
-      console.log(`📊 Classified expense "${description}" as: ${debitCategory}`);
-    } else if (type === "income") {
-      creditCategory = classifyCategory(description);
-      console.log(`📊 Classified income "${description}" as: ${creditCategory}`);
-    } else if (type === "transfer") {
-      debitCategory = "transfer";
-      creditCategory = "transfer";
-    }
-
-    const tx = buildLedgerTxn({
-      userId,
-      from: fromAccount,
-      to: toAccount,
-      amount: parseFloat(amount),
-      description,
-      timestamp,
-      debitCategory,
-      creditCategory,
+    // 1. Create Transaction in DB (PENDING status)
+    // We create the record *before* queuing to ensure we have an ID to return.
+    const transaction = await prisma.transaction.create({
+      data: {
+        userId,
+        amount: parseFloat(amount),
+        category: type,
+        description,
+        timestamp: new Date(timestamp),
+        status: 'PENDING',
+        idempotencyKey: idempotencyKey || undefined, // Store if present
+        // We don't have accounts linked in Relation yet in the schema, 
+        // relying on LedgerEntries later. 
+        // But wait, the schema has `user` relation.
+      }
     });
 
-    const created = await createTransaction(tx);
+    // 2. Add to Queue
+    await transactionQueue.add('process-transaction', {
+      transactionId: transaction.id,
+      userId,
+      fromAccount,
+      toAccount,
+      amount: parseFloat(amount),
+      description,
+      type,
+      timestamp
+    });
 
-    return res.status(201).json({ message: 'Transaction added successfully', transaction: created });
+    // 3. Return 202 Accepted
+    return res.status(202).json({
+      status: 'ACCEPTED',
+      message: 'Transaction queued for processing',
+      transactionId: transaction.id,
+      originalAmount: amount,
+      estimatedTime: '2-5 seconds'
+    });
+
   } catch (error: any) {
     console.error('Transaction creation failed:', error);
-    console.error('Error details:', error.message, error.stack);
-    
-    // Handle specific errors
-    if (error.message?.includes('account not found')) {
-      return res.status(404).json({ 
-        error: 'Account not found', 
-        details: error.message,
-        hint: 'Please ensure both "from" and "to" accounts exist before creating a transaction'
-      });
+    // Handle uniqueness constraint for idempotencyKey
+    if (error.code === 'P2002' && error.meta?.target?.includes('idempotencyKey')) {
+        return res.status(409).json({ error: 'Duplicate idempotency key' });
     }
-    
-    return res.status(500).json({ error: 'Failed to add transaction', details: error.message });
+    return res.status(500).json({ error: 'Failed to queue transaction', details: error.message });
   }
 };
 

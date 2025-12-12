@@ -9,6 +9,7 @@ import reversalRoutes from './reversalRoutes';
 import nlpRoutes from './nlpRoutes';
 import userRoutes from './userRoutes';
 import authRoutes from './authRoutes'; // ✅ ADD THIS LINE
+import systemRoutes from './systemRoutes';
 
 const router: Router = Router();
 
@@ -22,5 +23,6 @@ router.use('/reversal', reversalRoutes);
 router.use('/nlp', nlpRoutes);
 router.use('/users', userRoutes);
 router.use('/auth', authRoutes); // ✅ ADD THIS LINE (/api/auth/google etc.)
+router.use('/system', systemRoutes);
 
 export default router;

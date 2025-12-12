@@ -20,6 +20,18 @@ services:
     networks:
       - ledgerx-network
 
+  # Redis (Queue & Caching)
+  redis:
+    image: redis:alpine
+    container_name: ledgerx-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ledgerx-network
+
   # Backend API
   backend:
     build:
@@ -92,6 +104,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:

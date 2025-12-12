@@ -27,9 +27,13 @@ import {
   ArrowLeftRight,
   AlertCircle,
   CheckCircle2,
-  Plus
+  CheckCircle2,
+  Plus,
+  Loader2
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { LifecycleTracker } from "@/components/system/LifecycleTracker"
+import { useTransactionStatus } from "@/hooks/useTransactionStatus"
 
 // Update the Transaction interface to match the actual backend data
 interface Transaction {
@@ -49,7 +53,7 @@ interface Transaction {
 
 
 type Account = {
-  id: string; 
+  id: string;
   name: string;
   type: string;
 };
@@ -63,7 +67,27 @@ export default function TransactionsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [accounts, setAccounts] = useState<Account[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
   const { toast } = useToast()
+
+  // Async Transaction State
+  const [pendingTxId, setPendingTxId] = useState<string | null>(null);
+  const { status: txStatus } = useTransactionStatus({ transactionId: pendingTxId });
+
+  // Watch for completion
+  useEffect(() => {
+    if (txStatus === 'SUCCESS') {
+      toast({ title: "Transaction Completed", description: "Funds have been transferred successfully." });
+      setPendingTxId(null);
+      setShowCreateDialog(false);
+      resetForm();
+      fetchTransactions();
+    } else if (txStatus === 'FAILED') {
+      toast({ title: "Transaction Failed", description: "Something went wrong.", variant: "destructive" });
+      setPendingTxId(null);
+      // keep dialog open to retry?
+    }
+  }, [txStatus]);
 
   const [formData, setFormData] = useState({
     description: "",
@@ -148,45 +172,53 @@ export default function TransactionsPage() {
       const payload =
         formData.type === "transfer"
           ? {
+            amount: parseFloat(formData.amount),
+            from: formData.from,
+            to: formData.to,
+            type: formData.type, // FIXED from `type` → `type`
+            description: formData.description,
+            timestamp: formData.timestamp
+          }
+          : formData.type === "expense"
+            ? {
               amount: parseFloat(formData.amount),
               from: formData.from,
-              to: formData.to,
-              type: formData.type, // FIXED from `type` → `type`
+              to: OTHERS_ACCOUNT_ID,
+              type: formData.type,
               description: formData.description,
               timestamp: formData.timestamp
             }
-          : formData.type === "expense"
-            ? {
-                amount: parseFloat(formData.amount),
-                from: formData.from,
-                to: OTHERS_ACCOUNT_ID,
-                type: formData.type,
-                description: formData.description,
-                timestamp: formData.timestamp
-              }
             : {
-                amount: parseFloat(formData.amount),
-                from: OTHERS_ACCOUNT_ID,
-                to: formData.from,
-                type: formData.type,
-                description: formData.description,
-                timestamp: formData.timestamp
-              };
+              amount: parseFloat(formData.amount),
+              from: OTHERS_ACCOUNT_ID,
+              to: formData.from,
+              type: formData.type,
+              description: formData.description,
+              timestamp: formData.timestamp
+            };
 
       const response = await axios.post(API_ENDPOINTS.TRANSACTIONS.CREATE, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'idempotency-key': crypto.randomUUID() // Add Idempotency
         },
       });
 
-      toast({
-        title: "Success!",
-        description: "Transaction created successfully",
-      });
+      if (response.status === 202) {
+        // Async Flow
+        setPendingTxId(response.data.transactionId);
+        // Do NOT close dialog, UI will switch to Tracker
+      } else {
+        // Fallback Sync Flow (if changed back)
+        toast({
+          title: "Success!",
+          description: "Transaction created successfully",
+        });
+        resetForm();
+        setShowCreateDialog(false);
+        fetchTransactions();
+      }
 
-      resetForm();
-      setShowCreateDialog(false);
-      fetchTransactions();
     } catch (err: any) {
       console.error("Transaction creation error:", err);
       toast({
@@ -234,7 +266,7 @@ export default function TransactionsPage() {
       setTransactions(res.data)
     } catch (err: any) {
       console.error("Fetch error:", err)
-      const errorMessage = err.response?.status === 404 
+      const errorMessage = err.response?.status === 404
         ? "No transactions found for this user"
         : "Could not fetch transaction data. Please ensure you're logged in."
       setError(errorMessage)
@@ -356,9 +388,9 @@ export default function TransactionsPage() {
                   View and manage your financial transactions
                 </p>
               </div>
-              <Button 
-                onClick={fetchTransactions} 
-                variant="outline" 
+              <Button
+                onClick={fetchTransactions}
+                variant="outline"
                 className="flex items-center space-x-2"
                 disabled={loading}
               >
@@ -416,9 +448,9 @@ export default function TransactionsPage() {
                   </SelectContent>
                 </Select>
 
-                <Button 
+                <Button
                   onClick={handleExport}
-                  variant="outline" 
+                  variant="outline"
                   className="flex items-center space-x-2"
                 >
                   <Download className="h-4 w-4" />
@@ -502,13 +534,12 @@ export default function TransactionsPage() {
                           <p className={`font-bold text-lg ${getAmountColor(transaction.type)}`}>
                             {formatAmount(transaction.amount, transaction.type)}
                           </p>
-                          <Badge 
+                          <Badge
                             variant="outline"
-                            className={`text-xs capitalize ${
-                              transaction.type === 'income' ? 'border-green-300 text-green-700' :
-                              transaction.type === 'expense' ? 'border-red-300 text-red-700' :
-                              'border-blue-300 text-blue-700'
-                            }`}
+                            className={`text-xs capitalize ${transaction.type === 'income' ? 'border-green-300 text-green-700' :
+                                transaction.type === 'expense' ? 'border-red-300 text-red-700' :
+                                  'border-blue-300 text-blue-700'
+                              }`}
                           >
                             {transaction.type}
                           </Badge>
@@ -543,67 +574,61 @@ export default function TransactionsPage() {
           <Dialog open={showCreateDialog} onOpenChange={open => { setShowCreateDialog(open); if (!open) resetForm(); }}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create Transaction</DialogTitle>
+                <DialogTitle>
+                  {pendingTxId ? 'Processing Transaction...' : 'Create Transaction'}
+                </DialogTitle>
               </DialogHeader>
-              <form
-                onSubmit={e => {
-                  e.preventDefault();
-                  handleCreateTransaction();
-                }}
-                className="space-y-4"
-              >
-                <Input
-                  placeholder="Description"
-                  value={formData.description}
-                  onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
-                  required
-                />
-                <Input
-                  placeholder="Amount"
-                  type="number"
-                  value={formData.amount}
-                  onChange={e => setFormData(f => ({ ...f, amount: e.target.value }))}
-                  required
-                />
-                <Select
-                  value={formData.type}
-                  onValueChange={value => setFormData(f => ({ ...f, type: value, accountId: "", debitAccountId: "", creditAccountId: "", from: "", to: "", timestamp: "" }))}
-                  required
+
+              {pendingTxId ? (
+                <div className="py-6 flex flex-col items-center justify-center space-y-4">
+                  <LifecycleTracker status={txStatus || 'PENDING'} />
+                  <p className="text-sm text-muted-foreground text-center animate-pulse">
+                    Verifying funds & securing double-entry ledger...
+                  </p>
+                </div>
+              ) : (
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    handleCreateTransaction();
+                  }}
+                  className="space-y-4"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="income">Income</SelectItem>
-                    <SelectItem value="expense">Expense</SelectItem>
-                    <SelectItem value="transfer">Transfer</SelectItem>
-                  </SelectContent>
-                </Select>
-                {formData.type === "income" || formData.type === "expense" ? (
+                  <Input
+                    placeholder="Description"
+                    value={formData.description}
+                    onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
+                    required
+                  />
+                  <Input
+                    placeholder="Amount"
+                    type="number"
+                    value={formData.amount}
+                    onChange={e => setFormData(f => ({ ...f, amount: e.target.value }))}
+                    required
+                  />
                   <Select
-                    value={formData.from}
-                    onValueChange={value => setFormData(f => ({ ...f, from: value }))}
+                    value={formData.type}
+                    onValueChange={value => setFormData(f => ({ ...f, type: value, accountId: "", debitAccountId: "", creditAccountId: "", from: "", to: "", timestamp: "" }))}
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select Account" />
+                      <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {accounts.map((acc: Account) => (
-                        <SelectItem key={acc.id} value={acc.id}>{acc.name} ({acc.type})</SelectItem>
-                      ))}
+                      <SelectItem value="income">Income</SelectItem>
+                      <SelectItem value="expense">Expense</SelectItem>
+                      <SelectItem value="transfer">Transfer</SelectItem>
                     </SelectContent>
                   </Select>
-                ) : null}
-                {formData.type === "transfer" ? (
-                  <div className="flex gap-2">
+                  {formData.type === "income" || formData.type === "expense" ? (
                     <Select
                       value={formData.from}
                       onValueChange={value => setFormData(f => ({ ...f, from: value }))}
                       required
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="From Account" />
+                        <SelectValue placeholder="Select Account" />
                       </SelectTrigger>
                       <SelectContent>
                         {accounts.map((acc: Account) => (
@@ -611,40 +636,58 @@ export default function TransactionsPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <Select
-                      value={formData.to}
-                      onValueChange={value => setFormData(f => ({ ...f, to: value }))}
+                  ) : null}
+                  {formData.type === "transfer" ? (
+                    <div className="flex gap-2">
+                      <Select
+                        value={formData.from}
+                        onValueChange={value => setFormData(f => ({ ...f, from: value }))}
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="From Account" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accounts.map((acc: Account) => (
+                            <SelectItem key={acc.id} value={acc.id}>{acc.name} ({acc.type})</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select
+                        value={formData.to}
+                        onValueChange={value => setFormData(f => ({ ...f, to: value }))}
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="To Account" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accounts.map((acc: Account) => (
+                            <SelectItem key={acc.id} value={acc.id}>{acc.name} ({acc.type})</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : null}
+                  <div>
+                    <Label>Date & Time</Label>
+                    <Input
+                      type="datetime-local"
+                      value={formData.timestamp}
+                      onChange={e => setFormData(f => ({ ...f, timestamp: e.target.value }))}
                       required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="To Account" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((acc: Account) => (
-                          <SelectItem key={acc.id} value={acc.id}>{acc.name} ({acc.type})</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
-                ) : null}
-                <div>
-                  <Label>Date & Time</Label>
-                  <Input
-                    type="datetime-local"
-                    value={formData.timestamp}
-                    onChange={e => setFormData(f => ({ ...f, timestamp: e.target.value }))}
-                    required
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => { setShowCreateDialog(false); resetForm(); }}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isCreating}>
-                    {isCreating ? 'Creating...' : 'Create'}
-                  </Button>
-                </div>
-              </form>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => { setShowCreateDialog(false); resetForm(); }}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isCreating}>
+                      {isCreating ? 'Creating...' : 'Create'}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </DialogContent>
           </Dialog>
         </main>

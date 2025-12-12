@@ -24,21 +24,30 @@ model User {
 }
 
 model Transaction {
-  id            String         @id @default(uuid())
-  userId        String
-  user          User           @relation(fields: [userId], references: [id])
-  amount        Float
-  category      String         @default("others")
-  timestamp     DateTime       @default(now())
-  riskScore     Float?         
-  isFlagged     Boolean        @default(false)
-  reasons       String?        
-  description   String?        
-  createdAt     DateTime       @default(now())
-  ledgerEntries LedgerEntry[]
-  parentId      String?
-  parent        Transaction?   @relation("ReversalLink", fields: [parentId], references: [id])
-  children      Transaction[]  @relation("ReversalLink")
+  id             String          @id @default(uuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id])
+  amount         Float
+  category       String          @default("others")
+  timestamp      DateTime        @default(now())
+  riskScore      Float?
+  isFlagged      Boolean         @default(false)
+  reasons        String?
+  description    String?
+  createdAt      DateTime        @default(now())
+  ledgerEntries  LedgerEntry[]
+  parentId       String?
+  parent         Transaction?    @relation("ReversalLink", fields: [parentId], references: [id])
+  children       Transaction[]   @relation("ReversalLink")
+  status         TransactionStatus @default(PENDING)
+  idempotencyKey String?         @unique
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
 }
 
 model Account {
