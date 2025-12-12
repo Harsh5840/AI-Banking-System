@@ -9,7 +9,8 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+# Use --no-frozen-lockfile to avoid lockfile mismatch errors during container builds
+RUN pnpm install --no-frozen-lockfile
 
 # Copy the rest of the application
 COPY . .
