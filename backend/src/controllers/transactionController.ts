@@ -182,3 +182,24 @@ export const handleReverseTransaction = async (req: Request, res: Response) => {
     return res.status(400).json({ error: (error as Error).message });
   }
 };
+
+export const handleGetTransactionById = async (req: Request, res: Response) => {
+  try {
+      const { id } = req.params;
+      const transaction = await prisma.transaction.findUnique({
+          where: { id },
+          include: {
+              ledgerEntries: true, // Fetch double-entry records
+          }
+      });
+
+      if (!transaction) {
+          return res.status(404).json({ error: 'Transaction not found' });
+      }
+
+      return res.json(transaction);
+  } catch (error: any) {
+      console.error('Fetch transaction failed:', error);
+      return res.status(500).json({ error: 'Failed to fetch transaction' });
+  }
+};

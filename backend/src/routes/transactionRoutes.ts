@@ -40,4 +40,12 @@ router.post(
   })
 );
 
+router.get(
+  '/:id',
+  requireRole('USER', 'ADMIN') as RequestHandler,
+  asyncHandler(async (req, res) => {
+    await controller.handleGetTransactionById(req, res);
+  })
+);
+
 export default router;

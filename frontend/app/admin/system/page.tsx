@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Terminal, CreditCard, RefreshCw } from "lucide-react"
+import { Terminal, CreditCard, RefreshCw, Database } from "lucide-react"
 
 export default function SystemControlPlane() {
     const [currentTxId, setCurrentTxId] = useState<string | null>(null);
@@ -20,10 +20,28 @@ export default function SystemControlPlane() {
     useEffect(() => {
         if (!currentTxId) setLedgerEntries([]);
 
-        // In a real app, query /api/ledger?transactionId=...
-        // For now, we leave it empty if not fetched.
-        // The user explicitly requested NO template data.
-    }, [currentTxId]);
+        const fetchLedger = async () => {
+            if (status === 'SUCCESS' && currentTxId) {
+                try {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/transactions/${currentTxId}/ledger`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.ledgerEntries && Array.isArray(data.ledgerEntries)) {
+                            setLedgerEntries(data.ledgerEntries);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch ledger entries", e);
+                }
+            }
+        }
+
+        fetchLedger();
+    }, [currentTxId, status]);
 
     const handleDemoTransaction = async () => {
         try {

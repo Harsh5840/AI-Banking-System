@@ -27,7 +27,6 @@ import {
   ArrowLeftRight,
   AlertCircle,
   CheckCircle2,
-  CheckCircle2,
   Plus,
   Loader2
 } from "lucide-react"
@@ -66,7 +65,6 @@ export default function TransactionsPage() {
   const [error, setError] = useState<string | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
-  const [accounts, setAccounts] = useState<Account[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
   const { toast } = useToast()
 
@@ -537,8 +535,8 @@ export default function TransactionsPage() {
                           <Badge
                             variant="outline"
                             className={`text-xs capitalize ${transaction.type === 'income' ? 'border-green-300 text-green-700' :
-                                transaction.type === 'expense' ? 'border-red-300 text-red-700' :
-                                  'border-blue-300 text-blue-700'
+                              transaction.type === 'expense' ? 'border-red-300 text-red-700' :
+                                'border-blue-300 text-blue-700'
                               }`}
                           >
                             {transaction.type}
