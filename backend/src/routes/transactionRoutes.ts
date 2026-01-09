@@ -41,6 +41,14 @@ router.post(
 );
 
 router.get(
+  '/department-budget',
+  requireRole('USER', 'ADMIN', 'FINANCE_MANAGER', 'ORG_ADMIN') as RequestHandler,
+  asyncHandler(async (req, res) => {
+    await controller.handleGetDepartmentBudget(req, res);
+  })
+);
+
+router.get(
   '/:id',
   requireRole('USER', 'ADMIN') as RequestHandler,
   asyncHandler(async (req, res) => {

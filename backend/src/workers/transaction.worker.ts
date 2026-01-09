@@ -2,7 +2,7 @@ import { Worker, Job } from 'bullmq';
 import { redis, redisUrl } from '../lib/redis'; // We'll need connection options
 import { prisma } from '../db/client';
 import { TRANSACTION_QUEUE_NAME } from '../queues/transaction.queue';
-import { classifyCategory } from '../ai/fraud'; // Reusing existing logic if possible, or keeping it simple
+import { classifyCategory } from '../ai/categorizer';
 
 // Define the Job Data Interface
 interface TransactionJobData {
@@ -232,11 +232,31 @@ const processTransaction = async (job: Job<TransactionJobData>) => {
 };
 
 // Create the Worker
-export const worker = new Worker(TRANSACTION_QUEUE_NAME, processTransaction, {
-  connection: {
-      host: 'localhost', // Should come from env in production
-      port: 6379
-  }
-});
+// We use a shared connection for the worker? No, workers need blocking connection.
+// We must provide connection config or a new instance.
+// If Redis is offline, this will crash.
+let worker: Worker | null = null;
 
-console.log(`[Worker] Listening for jobs on ${TRANSACTION_QUEUE_NAME}...`);
+try {
+  worker = new Worker(TRANSACTION_QUEUE_NAME, processTransaction, {
+    connection: {
+        host: 'localhost',
+        port: 6379,
+        lazyConnect: true, // Don't crash immediately 
+        retryStrategy: (times) => {
+            if (times > 3) return null; // Stop trying after 3 attempts
+            return 1000;
+        }
+    }
+  });
+
+  worker.on('error', (err) => {
+    // console.error('Worker error:', err.message);
+  });
+  
+  console.log(`[Worker] Listening for jobs on ${TRANSACTION_QUEUE_NAME}...`);
+} catch (error) {
+    console.warn('⚠️  Worker failed to start (Redis likely offline). Background processing disabled.');
+}
+
+export { worker };

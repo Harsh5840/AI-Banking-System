@@ -46,16 +46,16 @@ export default function HomePage() {
         stagger: 0.15,
         clearProps: "all" // Clean up after animation
       })
-      .from(
-        ".hero-image",
-        {
-          x: 50,
-          opacity: 0,
-          duration: 1.2,
-          clearProps: "all"
-        },
-        "-=0.8",
-      )
+        .from(
+          ".hero-image",
+          {
+            x: 50,
+            opacity: 0,
+            duration: 1.2,
+            clearProps: "all"
+          },
+          "-=0.8",
+        )
 
       // Stats counter animation with one-time trigger
       ScrollTrigger.create({
@@ -74,7 +74,7 @@ export default function HomePage() {
                 delay: index * 0.15,
                 ease: "power2.inOut",
                 snap: isDecimal ? { textContent: 0.1 } : { textContent: 1 },
-                onUpdate: function() {
+                onUpdate: function () {
                   const value = parseFloat(this.targets()[0].textContent)
                   if (isDecimal) {
                     el.textContent = value.toFixed(1)
@@ -186,14 +186,15 @@ export default function HomePage() {
               <div className="space-y-4">
                 <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
                   <Shield className="w-3 h-3 mr-1" />
-                  Enterprise Banking Platform
+                  Enterprise-Grade B2B SaaS
                 </Badge>
                 <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white leading-tight">
-                  AI-Powered Banking & Ledger Management System
+                  Corporate Treasury & Spend Management Platform
                 </h1>
                 <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Professional-grade double-entry ledger system with real-time fraud detection, AI-powered analytics, 
-                  and enterprise-level transaction management. Built for financial institutions and businesses.
+                  Process high-concurrency corporate transactions with <strong>real-time budget enforcement</strong>,
+                  AI fraud detection, and 100% ledger integrity. Built for fast-growing companies managing
+                  departmental spend at scale.
                 </p>
               </div>
 
@@ -206,7 +207,7 @@ export default function HomePage() {
                 </Link>
                 <Link href="/login">
                   <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 hover:bg-slate-50 dark:hover:bg-slate-800">
-                    Sign In
+                    View Demo
                     <Lock className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
@@ -215,15 +216,15 @@ export default function HomePage() {
               <div className="flex items-center space-x-6 pt-4">
                 <div className="flex items-center space-x-2">
                   <Shield className="h-5 w-5 text-green-500" />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">Bank-Grade Security</span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Multi-Tenant</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Zap className="h-5 w-5 text-yellow-500" />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">Real-Time Processing</span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Budget Enforcement</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <BarChart3 className="h-5 w-5 text-blue-500" />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">AI Analytics</span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">AI Fraud Detection</span>
                 </div>
               </div>
             </div>
@@ -232,7 +233,7 @@ export default function HomePage() {
               <div className="relative">
                 <img
                   src="/images/hero-dashboard.png"
-                  alt="LedgerX Dashboard"
+                  alt="LedgerX Enterprise Dashboard"
                   className="rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-slate-900/10 to-transparent rounded-2xl" />
@@ -271,11 +272,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              Enterprise Banking Features
+              Built for Corporate Spend Management
             </h2>
             <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              Professional-grade double-entry ledger system with AI fraud detection, real-time transaction processing, 
-              and comprehensive account management for financial institutions.
+              Multi-tenant architecture with department budgets, real-time enforcement, double-entry accounting,
+              and AI-powered fraud detection. Everything you need to manage corporate expenses at scale.
             </p>
           </div>
 

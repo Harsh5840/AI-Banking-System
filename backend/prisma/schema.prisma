@@ -69,6 +69,8 @@ model Transaction {
   children       Transaction[]   @relation("ReversalLink")
   status         TransactionStatus @default(PENDING)
   idempotencyKey String?         @unique
+
+  @@index([departmentId, timestamp])  // Optimize budget queries
 }
 
 enum TransactionStatus {

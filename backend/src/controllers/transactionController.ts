@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { createTransaction as buildLedgerTxn } from '../core/ledger';
-import { classifyCategory } from '../ai/fraud';
+import { classifyCategory } from '../ai/categorizer';
 import { prisma } from '../db/client';
 import { SYSTEM_INCOME_ACCOUNT_ID, SYSTEM_EXPENSE_ACCOUNT_ID } from '../config/env';
 
@@ -201,5 +201,50 @@ export const handleGetTransactionById = async (req: Request, res: Response) => {
   } catch (error: any) {
       console.error('Fetch transaction failed:', error);
       return res.status(500).json({ error: 'Failed to fetch transaction' });
+  }
+};
+
+export const handleGetDepartmentBudget = async (req: Request, res: Response) => {
+  try {
+    const { id: userId } = req.user!;
+
+    // Fetch user with department and organization info
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        department: true,
+        organization: true,
+      },
+    });
+
+    if (!user || !user.departmentId || !user.department) {
+      return res.status(404).json({ error: 'User is not part of a department' });
+    }
+
+    // Calculate current month's spend for the department
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    const monthlySpend = await prisma.transaction.aggregate({
+      where: {
+        departmentId: user.departmentId,
+        timestamp: { gte: startOfMonth, lte: endOfMonth },
+        status: { in: ['SUCCESS', 'PROCESSING'] },
+      },
+      _sum: { amount: true },
+    });
+
+    const currentSpend = monthlySpend._sum.amount || 0;
+
+    return res.json({
+      departmentName: user.department.name,
+      budgetLimit: user.department.budgetLimit,
+      currentSpend: Math.abs(currentSpend), // Return positive number
+      organizationName: user.organization?.name || 'Unknown Organization',
+    });
+  } catch (error: any) {
+    console.error('Fetch department budget failed:', error);
+    return res.status(500).json({ error: 'Failed to fetch department budget' });
   }
 };
