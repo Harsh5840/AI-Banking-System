@@ -17,7 +17,7 @@ interface TransactionJobData {
 }
 
 const processTransaction = async (job: Job<TransactionJobData>) => {
-  const { transactionId, userId, fromAccount, toAccount, amount, description, type, timestamp } = job.data;
+  const { transactionId, userId, fromAccount, toAccount, amount, description, type, timestamp} = job.data;
   console.log(`[Worker] Processing Transaction: ${transactionId}`);
 
   try {
@@ -27,8 +27,47 @@ const processTransaction = async (job: Job<TransactionJobData>) => {
       data: { status: 'PROCESSING' }
     });
 
-    // 2. Perform Logic inside a Serializable Transaction
+    //  2. Perform Logic inside a Serializable Transaction
     await prisma.$transaction(async (tx) => {
+      // === ENTERPRISE FEATURE: Department Budget Enforcement ===
+      // Fetch user's department to check if they're part of an organization
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        include: { department: true, organization: true }
+      });
+
+      // If user belongs to a department with a budget limit, enforce it
+      if (user?.departmentId && user.department) {
+        const dept = user.department;
+        
+        // Calculate current month's spend for this department
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+        const monthlySpend = await tx.transaction.aggregate({
+          where: {
+            departmentId: dept.id,
+            timestamp: { gte: startOfMonth, lte: endOfMonth },
+            status: { in: ['SUCCESS', 'PROCESSING'] } // Don't count failed transactions
+          },
+          _sum: { amount: true }
+        });
+
+        const currentSpend = monthlySpend._sum.amount || 0;
+        const projectedSpend = currentSpend + amount;
+
+        if (projectedSpend > dept.budgetLimit) {
+          throw new Error(
+            `Department "${dept.name}" budget exceeded. ` +
+            `Limit: $${dept.budgetLimit}, Current: $${currentSpend}, Requested: $${amount}`
+          );
+        }
+
+        console.log(`[Budget Check] Department: ${dept.name}, Spent: $${currentSpend}/$${dept.budgetLimit}`);
+      }
+      // === END Budget Enforcement ===
+
       // A. Lock the SENDER's account (Pessimistic Lock)
       // This ensures no other transaction can modify this account's balance until we commit.
       // Note: We only need to check balance for 'expense' and 'transfer' where money leaves the user.

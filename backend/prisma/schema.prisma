@@ -7,26 +7,54 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Organization {
+  id          String       @id @default(uuid())
+  name        String
+  taxId       String?      @unique
+  departments Department[]
+  users       User[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Department {
+  id             String        @id @default(uuid())
+  name           String
+  budgetLimit    Float         // Monthly budget cap
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  users          User[]
+  transactions   Transaction[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  password      String?
-  name          String?
-  googleId      String?        @unique
-  githubId      String?        @unique
-  image         String?
-  role          Role           @default(USER)
-  accounts      Account[]
-  entries       LedgerEntry[]
-  transactions  Transaction[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id             String         @id @default(uuid())
+  email          String         @unique
+  password       String?
+  name           String?
+  googleId       String?        @unique
+  githubId       String?        @unique
+  image          String?
+  role           Role           @default(EMPLOYEE)
+  organizationId String?
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  departmentId   String?
+  department     Department?    @relation(fields: [departmentId], references: [id])
+  accounts       Account[]
+  entries        LedgerEntry[]
+  transactions   Transaction[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 model Transaction {
   id             String          @id @default(uuid())
   userId         String
   user           User            @relation(fields: [userId], references: [id])
+  departmentId   String?
+  department     Department?     @relation(fields: [departmentId], references: [id])
   amount         Float
   category       String          @default("others")
   timestamp      DateTime        @default(now())
@@ -89,15 +117,18 @@ model LedgerEntry {
 }
 
 enum Role {
-  USER
-  ADMIN
+  EMPLOYEE
+  ORG_ADMIN
+  FINANCE_MANAGER
+  SYSTEM_ADMIN
   AUDITOR
 }
 
 enum AccountType {
-  WALLET
-  SAVINGS
-  BUSINESS
+  CORPORATE_CARD
+  DEPARTMENT_BUDGET
+  VENDOR_PAYMENT
+  PERSONAL_LEGACY  // For migrated personal accounts
 }
 
 enum EntryType {

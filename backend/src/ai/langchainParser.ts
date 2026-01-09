@@ -2,6 +2,7 @@
 import dotenv from "dotenv";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { PromptTemplate } from "@langchain/core/prompts";
+import { redis } from "../lib/redis"; // Import Redis
 
 dotenv.config();
 
@@ -11,12 +12,46 @@ interface NLPResult {
   limit?: number;
 }
 
+const RATE_LIMIT_WINDOW = 60; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 10;
+const CACHE_TTL = 3600; // 1 hour
+
+/**
+ * Rate Limiter using Redis
+ * @returns true if allowed, false if limit exceeded
+ */
+async function checkRateLimit(userId: string = 'global'): Promise<boolean> {
+  const key = `ai_ratelimit:${userId}`;
+  const current = await redis.incr(key);
+  if (current === 1) {
+    await redis.expire(key, RATE_LIMIT_WINDOW);
+  }
+  return current <= RATE_LIMIT_MAX_REQUESTS;
+}
+
 /**
  * Parse user query using Google Gemini AI via LangChain
- * Falls back to basic parsing if AI fails
+ * Falls back to basic parsing if AI fails or rate limit exceeded
  */
-export async function parseQueryWithLangChain(question: string): Promise<NLPResult> {
+export async function parseQueryWithLangChain(question: string, userId: string = 'anon'): Promise<NLPResult> {
   try {
+    // 1. Check Rate Limit
+    const isAllowed = await checkRateLimit(userId);
+    if (!isAllowed) {
+      console.warn(`⚠️ Rate limit exceeded for user ${userId}. Using fallback parser.`);
+      return fallbackParser(question);
+    }
+
+    // 2. Check Cache
+    const normalizedQuestion = question.trim().toLowerCase();
+    const cacheKey = `ai_query_cache:${Buffer.from(normalizedQuestion).toString('base64')}`;
+    const cachedResult = await redis.get(cacheKey);
+
+    if (cachedResult) {
+      console.log('⚡ Using cached AI response');
+      return JSON.parse(cachedResult);
+    }
+
     // Check if Google API key is configured
     if (!process.env.GOOGLE_API_KEY || process.env.GOOGLE_API_KEY === 'your_google_api_key_here') {
       console.warn('⚠️  Google API key not configured. Using fallback parser.');
@@ -85,12 +120,16 @@ Do not include any explanation, only the JSON object.
 
     const parsed: NLPResult = JSON.parse(jsonMatch[0]);
 
-    // Validate and sanitize the response
-    return {
+    const finalResult = {
       intent: parsed.intent || "UNKNOWN",
       filters: parsed.filters || {},
       limit: parsed.limit || 10,
     };
+
+    // 3. Cache Success Result
+    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(finalResult));
+
+    return finalResult;
 
   } catch (error) {
     console.error('❌ Error parsing query with Google Gemini AI:', error);
