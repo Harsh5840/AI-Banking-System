@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Navbar } from "@/components/layout/navbar"
 import { API_ENDPOINTS } from "@/lib/api-endpoints"
+import { DepartmentBudgetCard } from "@/components/system/DepartmentBudgetCard"
 import {
   TrendingUp,
   TrendingDown,
@@ -55,6 +56,8 @@ export default function UserDashboard() {
   const [categoryData, setCategoryData] = useState<any[]>([])
   const [monthlyData, setMonthlyData] = useState<any[]>([])
   const [riskAlerts, setRiskAlerts] = useState<number>(0)
+  const [userName, setUserName] = useState<string>("John")
+  const [userDepartment, setUserDepartment] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -121,6 +124,16 @@ export default function UserDashboard() {
 
         setRiskAlerts(txData.filter((tx: Transaction) => Math.abs(tx.amount) > 1000).length);
 
+        // Fetch user info (name, department)
+        const userRes = await fetch(API_ENDPOINTS.AUTH.ME || '/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUserName(userData.name || "John");
+          setUserDepartment(userData.departmentName || null);
+        }
+
       } catch (e) {
         console.error("Dashboard fetch error", e);
       }
@@ -136,11 +149,20 @@ export default function UserDashboard() {
 
       <Sidebar userRole="USER" />
       <div className="flex-1 flex flex-col overflow-hidden z-10">
-        <Navbar userRole="USER" userName="John Doe" />
+        <Navbar userRole="USER" userName={userName} />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Good morning, John! 👋</h1>
-            <p className="text-slate-600 dark:text-slate-400">Here’s your financial overview for today</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+              Good morning, {userName}! 👋
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400">
+              {userDepartment ? `${userDepartment} • ` : ""}Here's your financial overview for today
+            </p>
+          </div>
+
+          {/* Department Budget Card (Only shows for org members) */}
+          <div className="mb-6">
+            <DepartmentBudgetCard />
           </div>
 
           {/* Stat Cards */}
