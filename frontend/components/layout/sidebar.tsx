@@ -21,6 +21,7 @@ import {
   Activity,
   Settings,
   HelpCircle,
+  CreditCard,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
@@ -41,9 +42,9 @@ export function Sidebar({ userRole }: SidebarProps) {
       icon: Home,
     },
     {
-      title: "My Accounts",
+      title: "Corporate Cards",
       href: "/accounts",
-      icon: Wallet,
+      icon: CreditCard,
     },
     {
       title: "Transactions",
@@ -56,7 +57,7 @@ export function Sidebar({ userRole }: SidebarProps) {
       icon: BarChart3,
     },
     {
-      title: "NLP Assistant",
+      title: "AI Policy Assistant",
       href: "/nlp",
       icon: Brain,
     },
@@ -69,7 +70,7 @@ export function Sidebar({ userRole }: SidebarProps) {
       icon: LayoutDashboard,
     },
     {
-      title: "Users & Accounts",
+      title: "Users & Cards",
       href: "/admin/users",
       icon: Users,
     },

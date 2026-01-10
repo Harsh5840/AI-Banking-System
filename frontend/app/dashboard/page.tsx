@@ -58,15 +58,26 @@ export default function UserDashboard() {
   const [riskAlerts, setRiskAlerts] = useState<number>(0)
   const [userName, setUserName] = useState<string>("John")
   const [userDepartment, setUserDepartment] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
-      // ... (fetch logic remains same) ...
-      // We just need to make sure we don't break expected state
       const token = localStorage.getItem("token");
       if (!token) return;
 
       try {
+        // Fetch user info first to determine context
+        const userRes = await fetch(API_ENDPOINTS.AUTH.ME || '/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUserName(userData.name || "User");
+          setUserDepartment(userData.departmentName || null);
+          setUserRole(userData.role || null);
+        }
+
         const txRes = await fetch(API_ENDPOINTS.TRANSACTIONS.ALL, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -124,16 +135,6 @@ export default function UserDashboard() {
 
         setRiskAlerts(txData.filter((tx: Transaction) => Math.abs(tx.amount) > 1000).length);
 
-        // Fetch user info (name, department)
-        const userRes = await fetch(API_ENDPOINTS.AUTH.ME || '/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setUserName(userData.name || "John");
-          setUserDepartment(userData.departmentName || null);
-        }
-
       } catch (e) {
         console.error("Dashboard fetch error", e);
       }
@@ -147,16 +148,18 @@ export default function UserDashboard() {
       {/* Background Pattern */}
       <DotPattern className={cn("[mask-image:radial-gradient(600px_circle_at_center,white,transparent)] opacity-50")} />
 
-      <Sidebar userRole="USER" />
+      <Sidebar userRole={userRole || "USER"} />
       <div className="flex-1 flex flex-col overflow-hidden z-10">
-        <Navbar userRole="USER" userName={userName} />
+        <Navbar userRole={userRole || "USER"} userName={userName} />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-              Good morning, {userName}! 👋
+              {userDepartment ? `${userDepartment} Dashboard` : `Welcome, ${userName}`}
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              {userDepartment ? `${userDepartment} • ` : ""}Here's your financial overview for today
+              {userDepartment
+                ? `Overview of ${userRole === 'FINANCE_MANAGER' ? 'departmental' : 'your'} spending and budget health`
+                : "Track and manage your business expenses"}
             </p>
           </div>
 
@@ -387,14 +390,14 @@ function AssistantCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AI Assistant</CardTitle>
-        <CardDescription>Ask about your spending</CardDescription>
+        <CardTitle>AI Policy Assistant</CardTitle>
+        <CardDescription>Ask about budget, policy, or expenses</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="flex space-x-2">
             <Input
-              placeholder="What's my grocery spend this month?"
+              placeholder="Is my software subscription within policy?"
               className="flex-1"
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -406,12 +409,12 @@ function AssistantCard() {
             </Button>
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg min-h-[48px]">
-            {loading && <span className="text-sm text-slate-500">Thinking...</span>}
+            {loading && <span className="text-sm text-slate-500">Processing...</span>}
             {error && <span className="text-sm text-red-500">{error}</span>}
             {response && <span className="text-sm text-slate-700 dark:text-slate-300">{response}</span>}
             {!response && !loading && !error && (
               <p className="text-sm text-slate-700 dark:text-slate-300">
-                💡 Try asking: "Show my largest expenses this week" or "How much on entertainment?"
+                💡 Try asking: "What is the travel budget?" or "Is a $500 dinner allowed?"
               </p>
             )}
           </div>
