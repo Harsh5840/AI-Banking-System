@@ -9,6 +9,7 @@ export const redis = new Redis(redisUrl, {
   tls: isTls ? {
     rejectUnauthorized: false // Upstash usually works with this, or proper CA
   } : undefined,
+  family: 4,
   retryStrategy: (times) => {
     // Retry for 5 seconds then give up/throttle
     if (times > 5) {

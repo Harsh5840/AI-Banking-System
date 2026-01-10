@@ -1,9 +1,11 @@
+import 'dotenv/config';
 import { redis, isRedisOnline } from '../lib/redis';
 import { transactionQueue } from '../queues/transaction.queue';
 import { Worker } from 'bullmq';
 
 async function verifyInfrastructure() {
   console.log('🔍 Starting Redis & BullMQ Verification...');
+
 
   // 1. Check Redis Connection
   console.log('⏳ Checking Redis connection...');
@@ -12,7 +14,7 @@ async function verifyInfrastructure() {
     // Race ping against a 2-second timeout
     await Promise.race([
         redis.ping(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timed out')), 2000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timed out')), 10000))
     ]);
     const latency = Date.now() - start;
     console.log(`✅ Redis is ONLINE (Latency: ${latency}ms)`);
@@ -72,7 +74,7 @@ async function verifyInfrastructure() {
         console.error('❌ Verification Timed Out (Worker did not pick up job)');
         await worker.close();
         process.exit(1);
-      }, 5000);
+      }, 15000);
     });
 
   } catch (err) {
