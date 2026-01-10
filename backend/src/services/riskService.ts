@@ -2,7 +2,7 @@
 
 import { LedgerEntry } from "../core/ledger";
 import { analyzeFraud } from "./fraudService";
-import { ruleBasedScore } from "../ai/fraud";
+import { evaluateRisk, ruleBasedScore } from '../ai/riskEngine';
 
 // Configurable thresholds
 const TOTAL_RISK_THRESHOLD = parseInt(process.env.TOTAL_RISK_THRESHOLD || "60", 10);

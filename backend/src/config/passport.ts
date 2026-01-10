@@ -37,7 +37,7 @@ passport.use(
               data: {
                 email,
                 name: profile.displayName || "Google User",
-                role: "USER",
+                role: "EMPLOYEE",
                 password: null,
                 googleId: profile.id, // Save Google ID
               },

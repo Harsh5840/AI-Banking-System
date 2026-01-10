@@ -28,7 +28,7 @@ async function setupTestAccounts() {
         const wallet = await prisma.account.create({
           data: {
             name: "Main Wallet",
-            type: AccountType.WALLET,
+            type: AccountType.PERSONAL_LEGACY,
             userId: user.id,
           },
         });
@@ -37,8 +37,8 @@ async function setupTestAccounts() {
         // Create a Savings account
         const savings = await prisma.account.create({
           data: {
-            name: "Savings Account",
-            type: AccountType.SAVINGS,
+            name: "Savings (Legacy)",
+            type: AccountType.PERSONAL_LEGACY,
             userId: user.id,
           },
         });

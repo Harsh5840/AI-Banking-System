@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { parseQueryWithLLM } from "../ai/fraud"; // LangChain-based parser
+import { parseQuery } from '../ai/queryEngine'; // LangChain-based parser
 import { getTotalSpendingWithFilters, getTopCategoriesWithFilters } from "../services/analyticsService";
 
 export const handleNLPQuery = async (req: Request, res: Response) => {
@@ -11,7 +11,7 @@ export const handleNLPQuery = async (req: Request, res: Response) => {
     }
 
     // ⛓️ Parse the question using LangChain LLM
-    const parsed = await parseQueryWithLLM(question);
+    const parsed = await parseQuery(question);
 
     if (!parsed || !parsed.intent) {
       return res.status(200).json({ success: false, type: "UNKNOWN", message: "Invalid NLP parsing." });

@@ -8,9 +8,9 @@ import { AccountType } from "@prisma/client";
 
 const SYSTEM_USER_EMAIL = "system@ledgerx.internal";
 const SYSTEM_ACCOUNTS = [
-  { name: "External Income", type: AccountType.WALLET, description: "System account for all income transactions" },
-  { name: "External Expense", type: AccountType.WALLET, description: "System account for all expense transactions" },
-  { name: "External Transfer", type: AccountType.WALLET, description: "System account for external transfers" },
+  { name: "External Income", type: AccountType.VENDOR_PAYMENT, description: "System account for all income transactions" },
+  { name: "External Expense", type: AccountType.VENDOR_PAYMENT, description: "System account for all expense transactions" },
+  { name: "External Transfer", type: AccountType.VENDOR_PAYMENT, description: "System account for external transfers" },
 ];
 
 async function setupSystemAccounts() {
@@ -28,7 +28,7 @@ async function setupSystemAccounts() {
         data: {
           email: SYSTEM_USER_EMAIL,
           name: "System",
-          role: "ADMIN",
+          role: "SYSTEM_ADMIN",
         },
       });
       console.log(`✅ System user created: ${systemUser.id}\n`);

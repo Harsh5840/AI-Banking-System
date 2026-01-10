@@ -10,7 +10,7 @@ const router: Router = Router();
 router.post(
   "/query",
   authenticateJWT as RequestHandler,
-  requireRole("USER", "ADMIN") as RequestHandler,
+  requireRole("EMPLOYEE", "SYSTEM_ADMIN") as RequestHandler,
   validateQuery(nlpQuestionSchema) as RequestHandler,
   (req, res, next) => {
     handleNLPQuery(req, res).catch(next); // inline error handling for async

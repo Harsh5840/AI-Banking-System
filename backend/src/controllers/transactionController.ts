@@ -107,7 +107,7 @@ export const handleGetAllTransactions = async (req: Request, res: Response) => {
     
     let transactions: any[];
     
-    if (role === 'ADMIN') {
+    if (role === 'SYSTEM_ADMIN') {
       transactions = await prisma.transaction.findMany({
         include: {
           user: {
@@ -155,7 +155,7 @@ export const handleGetAllTransactions = async (req: Request, res: Response) => {
         status: 'completed',
         canReverse: !tx.parentId, // Allow reversing any non-reversed transaction
         hash: `tx_${tx.id.slice(0, 8)}`,
-        user: role === 'ADMIN' ? {
+        user: role === 'SYSTEM_ADMIN' ? {
           id: tx.user?.id || tx.userId,
           name: tx.user?.name || 'Unknown User',
           email: tx.user?.email || 'unknown@example.com'

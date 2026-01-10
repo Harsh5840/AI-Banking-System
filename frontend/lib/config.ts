@@ -5,6 +5,7 @@ export const config = {
   wsUrl: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5000',
   auth: {
     google: `${BACKEND_URL}/api/auth/google`,
+    github: `${BACKEND_URL}/api/auth/github`,
   },
   frontend: {
     url: process.env.NEXTAUTH_URL || 'http://localhost:3000',

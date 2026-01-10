@@ -1,7 +1,7 @@
 // src/middleware/roleMiddleware.ts
 import { Request, Response, NextFunction } from "express";
 
-type Role = "USER" | "ADMIN" | "AUDITOR";
+import { Role } from "../db/client";
 
 /**
  * Middleware to allow only users with specific roles
@@ -22,5 +22,5 @@ export function requireRole(...roles: Role[]) {
  * Shortcut middleware for admin-only access
  */
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  return requireRole("ADMIN")(req, res, next);
+  return requireRole("SYSTEM_ADMIN")(req, res, next);
 }

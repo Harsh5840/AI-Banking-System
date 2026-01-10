@@ -49,7 +49,7 @@ async function verifyInfrastructure() {
           return 'processed';
         }
       }, { 
-        connection: redis,
+        connection: redis as any,
         concurrency: 1 
       });
 

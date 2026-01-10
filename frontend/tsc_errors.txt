@@ -1,0 +1,29 @@
+__tests__/lib/api-endpoints.test.ts(6,26): error TS2339: Property 'BASE_URL' does not exist on type '{ AUTH: { REGISTER: string; LOGIN: string; ME: string; GOOGLE: string; }; USERS: { ALL: string; }; TRANSACTIONS: { ALL: string; CREATE: string; GET: (hash: string) => string; }; ANALYTICS: { TOTAL: string; TOP_CATEGORIES: string; MONTHLY_TREND: string; FLAGGED: string; }; NLP: { ...; }; ACCOUNTS: { ...; }; REVERSAL:...'.
+__tests__/lib/api-endpoints.test.ts(12,31): error TS2339: Property 'LOGOUT' does not exist on type '{ REGISTER: string; LOGIN: string; ME: string; GOOGLE: string; }'.
+__tests__/lib/api-endpoints.test.ts(16,39): error TS2339: Property 'GET_ALL' does not exist on type '{ ALL: string; CREATE: string; GET: (hash: string) => string; }'.
+__tests__/lib/api-endpoints.test.ts(21,35): error TS2339: Property 'GET_ALL' does not exist on type '{ ME: string; CREATE: string; UPDATE: (id: string) => string; DELETE: (id: string) => string; }'.
+__tests__/lib/api-endpoints.test.ts(26,36): error TS2339: Property 'DASHBOARD' does not exist on type '{ TOTAL: string; TOP_CATEGORIES: string; MONTHLY_TREND: string; FLAGGED: string; }'.
+__tests__/lib/utils.test.ts(2,10): error TS2305: Module '"../../lib/utils"' has no exported member 'formatCurrency'.
+__tests__/lib/utils.test.ts(2,26): error TS2305: Module '"../../lib/utils"' has no exported member 'formatDate'.
+__tests__/lib/utils.test.ts(2,38): error TS2305: Module '"../../lib/utils"' has no exported member 'truncateText'.
+__tests__/pages/dashboard.test.tsx(2,32): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+__tests__/pages/dashboard.test.tsx(9,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/dashboard.test.tsx(15,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/dashboard.test.tsx(16,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/dashboard.test.tsx(22,70): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/home.test.tsx(2,32): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+__tests__/pages/home.test.tsx(9,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/home.test.tsx(15,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/home.test.tsx(16,50): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/home.test.tsx(22,57): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/login.test.tsx(2,43): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+__tests__/pages/login.test.tsx(9,45): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/login.test.tsx(10,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/login.test.tsx(22,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/login.test.tsx(28,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+__tests__/pages/login.test.tsx(29,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<any>'.
+app/dashboard/page.tsx(95,78): error TS2339: Property 'accountId' does not exist on type 'Transaction'.
+app/dashboard/page.tsx(151,16): error TS2322: Type 'string' is not assignable to type '"USER" | "ADMIN"'.
+app/dashboard/page.tsx(153,17): error TS2322: Type 'string' is not assignable to type '"USER" | "ADMIN"'.
+app/login/page.tsx(71,42): error TS2339: Property 'github' does not exist on type '{ google: string; }'.
+vitest.setup.ts(2,25): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.

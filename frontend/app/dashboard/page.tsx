@@ -40,6 +40,7 @@ interface Transaction {
   category: string
   date: string
   status: string
+  accountId?: string
 }
 
 interface CategorySummary {

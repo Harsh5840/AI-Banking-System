@@ -3,7 +3,7 @@
  * Run with: npx tsx src/scripts/testClassification.ts
  */
 
-import { classifyCategory } from '../ai/fraud';
+import { classifyCategory } from '../ai/categorizer';
 
 const testCases = [
   // Entertainment
@@ -61,10 +61,10 @@ let passed = 0;
 let failed = 0;
 
 testCases.forEach(({ description, expected }) => {
-  const actual = classifyCategory(description);
-  const status = actual === expected ? '✅ PASS' : '❌ FAIL';
+  const category = classifyCategory(description);
+  const status = category === expected ? '✅ PASS' : '❌ FAIL';
   
-  if (actual === expected) {
+  if (category === expected) {
     passed++;
   } else {
     failed++;
@@ -72,9 +72,9 @@ testCases.forEach(({ description, expected }) => {
   
   const descDisplay = description || '(empty)';
   console.log(`${status} "${descDisplay}"`);
-  console.log(`   Expected: ${expected} | Got: ${actual}`);
+  console.log(`   Expected: ${expected} | Got: ${category}`);
   
-  if (actual !== expected) {
+  if (category !== expected) {
     console.log(`   ⚠️  Classification mismatch!`);
   }
   console.log('');

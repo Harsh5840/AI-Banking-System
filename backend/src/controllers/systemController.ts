@@ -1,7 +1,7 @@
 
 import { Request, Response } from 'express';
 import { transactionQueue } from '../queues/transaction.queue';
-import { prisma } from '../db/prisma'; // Assuming prisma instance exists here or in lib/prisma
+import { prisma } from '../db/client'; // Assuming prisma instance exists here or in lib/prisma
 
 // Lazy load prisma if not in db/prisma.
 // Based on typical project structure, checking if we need to modify imports.

@@ -120,7 +120,7 @@ export async function parseQuery(question: string): Promise<NLPQuery> {
 
   try {
     const model = new ChatGoogleGenerativeAI({
-      modelName: "gemini-pro",
+      model: "gemini-pro",
       temperature: 0,
       apiKey: process.env.GOOGLE_API_KEY,
     });

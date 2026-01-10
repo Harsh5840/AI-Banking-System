@@ -8,7 +8,7 @@ const router: Router = Router();
 router.post(
   "/assess",
   authenticateJWT as RequestHandler,
-  requireRole("ADMIN", "AUDITOR") as RequestHandler,
+  requireRole("SYSTEM_ADMIN", "FINANCE_MANAGER") as RequestHandler,
   (req, res, next) => {
     Promise.resolve(handleRiskAssessment(req, res)).catch(next);
   }

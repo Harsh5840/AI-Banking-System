@@ -3,6 +3,7 @@ import { redis, redisUrl } from '../lib/redis'; // We'll need connection options
 import { prisma } from '../db/client';
 import { TRANSACTION_QUEUE_NAME } from '../queues/transaction.queue';
 import { classifyCategory } from '../ai/categorizer';
+import { eventBus, EVENTS } from '../listeners/fraud.listener';
 
 // Define the Job Data Interface
 interface TransactionJobData {
@@ -206,7 +207,6 @@ const processTransaction = async (job: Job<TransactionJobData>) => {
     });
 
     // 4. Emit Event for Fraud Detection / Notification
-    const { eventBus, EVENTS } = await import('../listeners/fraud.listener');
     eventBus.emit(EVENTS.TRANSACTION_CREATED, {
         transactionId,
         userId,

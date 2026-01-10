@@ -21,7 +21,7 @@ export const registerUser = async (req: Request, res: Response) => {
       data: {
         email,
         name,
-        role: role ?? Role.USER,
+        role: role ?? Role.EMPLOYEE,
         password: hashedPassword,
       },
     });

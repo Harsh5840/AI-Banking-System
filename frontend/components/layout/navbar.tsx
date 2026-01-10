@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
 interface NavbarProps {
-  userRole: "USER" | "ADMIN"
+  userRole: string
   userName?: string
 }
 
@@ -87,7 +87,7 @@ export function Navbar({ userRole, userName = "John Doe" }: NavbarProps) {
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none text-slate-900 dark:text-white">{userName}</p>
                 <p className="text-xs leading-none text-slate-600 dark:text-slate-400">
-                  {userRole === "ADMIN" ? "Administrator" : "User"}
+                  {userRole === "ADMIN" || userRole === "SYSTEM_ADMIN" ? "Administrator" : "User"}
                 </p>
               </div>
             </DropdownMenuLabel>

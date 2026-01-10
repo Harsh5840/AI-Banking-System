@@ -26,7 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 
 interface SidebarProps {
-  userRole: "USER" | "ADMIN"
+  userRole: string
 }
 
 export function Sidebar({ userRole }: SidebarProps) {
@@ -97,7 +97,8 @@ export function Sidebar({ userRole }: SidebarProps) {
     // },
   ]
 
-  const navItems = userRole === "ADMIN" ? adminNavItems : userNavItems
+  const isAdmin = userRole === "ADMIN" || userRole === "SYSTEM_ADMIN";
+  const navItems = isAdmin ? adminNavItems : userNavItems
 
   const handleLogout = () => {
     localStorage.clear(); // Clear all local storage on logout

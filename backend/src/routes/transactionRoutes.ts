@@ -18,7 +18,7 @@ function asyncHandler(fn: (req: express.Request, res: express.Response, next: ex
 // Wrap async controllers to avoid TS issues and unhandled promise rejections
 router.post(
   '/create',
-  requireRole('USER', 'ADMIN') as RequestHandler,
+  requireRole('EMPLOYEE', 'SYSTEM_ADMIN') as RequestHandler,
   asyncHandler(async (req, res) => {
     await controller.handleCreateTransaction(req, res);
   })
@@ -26,7 +26,7 @@ router.post(
 
 router.get(
   '/all',
-  requireRole('USER', 'ADMIN') as RequestHandler,
+  requireRole('EMPLOYEE', 'SYSTEM_ADMIN') as RequestHandler,
   asyncHandler(async (req, res) => {
     await controller.handleGetAllTransactions(req, res);
   })
@@ -34,7 +34,7 @@ router.get(
 
 router.post(
   '/reverse/:transactionId',
-  requireRole('ADMIN') as RequestHandler,
+  requireRole('SYSTEM_ADMIN') as RequestHandler,
   asyncHandler(async (req, res) => {
     await controller.handleReverseTransaction(req, res);
   })
@@ -42,7 +42,7 @@ router.post(
 
 router.get(
   '/department-budget',
-  requireRole('USER', 'ADMIN', 'FINANCE_MANAGER', 'ORG_ADMIN') as RequestHandler,
+  requireRole('EMPLOYEE', 'SYSTEM_ADMIN', 'FINANCE_MANAGER', 'ORG_ADMIN') as RequestHandler,
   asyncHandler(async (req, res) => {
     await controller.handleGetDepartmentBudget(req, res);
   })
@@ -50,7 +50,7 @@ router.get(
 
 router.get(
   '/:id',
-  requireRole('USER', 'ADMIN') as RequestHandler,
+  requireRole('EMPLOYEE', 'SYSTEM_ADMIN') as RequestHandler,
   asyncHandler(async (req, res) => {
     await controller.handleGetTransactionById(req, res);
   })

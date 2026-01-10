@@ -19,7 +19,7 @@ async function checkUserRoles() {
 
     users.forEach((user) => {
       const displayName = user.name || user.email;
-      const roleEmoji = user.role === "ADMIN" ? "👑" : user.role === "AUDITOR" ? "🔍" : "👤";
+      const roleEmoji = user.role === "SYSTEM_ADMIN" ? "👑" : user.role === "AUDITOR" ? "🔍" : "👤";
       console.log(`${roleEmoji} ${displayName}`);
       console.log(`   Email: ${user.email}`);
       console.log(`   Role: ${user.role}`);
@@ -29,8 +29,8 @@ async function checkUserRoles() {
 
     console.log("=".repeat(60));
 
-    const adminCount = users.filter((u) => u.role === "ADMIN").length;
-    const userCount = users.filter((u) => u.role === "USER").length;
+    const adminCount = users.filter((u) => u.role === "SYSTEM_ADMIN").length;
+    const userCount = users.filter((u) => u.role === "EMPLOYEE").length;
 
     console.log(`\n📊 Summary:`);
     console.log(`   Admins: ${adminCount}`);

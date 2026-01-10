@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { prisma } from "../db/client";
-import {
-  getTotalSpent,
-  getTopSpendingCategories,
-  evaluateAnomaly,
-} from "../ai/fraud";
+import { evaluateRisk, evaluateAnomaly } from '../ai/riskEngine';
 import { LedgerEntry } from "../core/ledger";
 
 const FiltersSchema = z.object({
@@ -120,5 +116,5 @@ export const getFlaggedOrRiskyEntries = async (userId: string): Promise<any[]> =
 
 // ✅ Evaluate risk score dynamically for a new entry (optional)
 export const evaluateEntryRisk = async (entry: LedgerEntry) => {
-  return await evaluateAnomaly(entry);
+  return evaluateAnomaly(entry.amount);
 };

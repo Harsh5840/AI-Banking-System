@@ -38,7 +38,7 @@ const auditLog: RequestHandler = (req, res, next) => {
 router.post(
   "/:originalHash/reverse",
   authenticateJWT as RequestHandler,
-  requireRole("ADMIN", "USER") as RequestHandler,
+  requireRole("SYSTEM_ADMIN", "EMPLOYEE") as RequestHandler,
   validateReversalParams,
   auditLog,
   (req, res, next) => {

@@ -4,7 +4,7 @@ import { worker } from './workers/transaction.worker';
 // Handle graceful shutdown
 const gracefulShutdown = async (signal: string) => {
   console.log(`Received ${signal}, closing worker...`);
-  await worker.close();
+  await worker?.close();
   process.exit(0);
 };
 

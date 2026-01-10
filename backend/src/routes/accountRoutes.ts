@@ -17,8 +17,8 @@ const router:Router = Router();
 router.use(authenticateJWT as RequestHandler);
 
 // 📦 Accounts CRUD routes (for ADMIN + USER roles)
-const allowedRoles = requireRole("ADMIN", "USER");
-const adminOnly = requireRole("ADMIN");
+const allowedRoles = requireRole("SYSTEM_ADMIN", "EMPLOYEE");
+const adminOnly = requireRole("SYSTEM_ADMIN");
 
 router.post("/", allowedRoles as RequestHandler, handleCreateAccount as RequestHandler);  // POST /api/accounts
 router.get("/me", allowedRoles as RequestHandler, handleGetUserAccountsSelf as RequestHandler);  // GET /api/accounts/me

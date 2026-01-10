@@ -11,7 +11,7 @@ router.use(authenticateJWT as RequestHandler);
 
 router.post(
   "/check",
-  requireRole("ADMIN", "AUDITOR") as RequestHandler,
+  requireRole("SYSTEM_ADMIN", "FINANCE_MANAGER") as RequestHandler,
   validateQuery(fraudCheckSchema) as RequestHandler,
   handleFraudCheck 
 );

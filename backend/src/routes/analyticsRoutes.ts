@@ -23,7 +23,7 @@ router.use(authenticateJWT as RequestHandler);
 // GET /analytics/total?userId=...&category=...&month=...&year=...
 router.get(
   "/total",
-  requireRole("USER", "ADMIN") as RequestHandler,
+  requireRole("EMPLOYEE", "SYSTEM_ADMIN") as RequestHandler,
   // validateQuery(totalSpendingQuerySchema) as RequestHandler,
   handleTotalSpending
 );
@@ -31,7 +31,7 @@ router.get(
 // GET /analytics/top-categories?userId=...&month=...&year=...&limit=...
 router.get(
   "/top-categories",
-  requireRole("USER", "ADMIN") as RequestHandler,
+  requireRole("EMPLOYEE", "SYSTEM_ADMIN") as RequestHandler,
   // validateQuery(topCategoriesQuerySchema) as RequestHandler,
   handleTopCategories 
 );
@@ -39,7 +39,7 @@ router.get(
 // GET /analytics/monthly-trend?userId=...
 router.get(
   "/monthly-trend",
-  requireRole("USER", "ADMIN") as RequestHandler,
+  requireRole("EMPLOYEE", "SYSTEM_ADMIN") as RequestHandler,
   // validateQuery(monthlyTrendQuerySchema)        as RequestHandler,
   handleMonthlyTrend as RequestHandler
 );
@@ -47,7 +47,7 @@ router.get(
 // GET /analytics/flagged?userId=...
 router.get(
   "/flagged",
-  requireRole("USER", "ADMIN", "AUDITOR") as RequestHandler,
+  requireRole("EMPLOYEE", "SYSTEM_ADMIN", "FINANCE_MANAGER") as RequestHandler,
   // validateQuery(flaggedQuerySchema) as RequestHandler,
   handleFlaggedOrRisky as RequestHandler
 );

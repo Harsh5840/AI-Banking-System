@@ -24,7 +24,7 @@ async function makeUserAdmin() {
       process.exit(1);
     }
 
-    if (user.role === "ADMIN") {
+    if (user.role === "SYSTEM_ADMIN") {
       console.log(`\n✅ ${user.name || user.email} is already an admin!\n`);
       process.exit(0);
     }
@@ -32,7 +32,7 @@ async function makeUserAdmin() {
     // Update user role to ADMIN
     const updated = await prisma.user.update({
       where: { email },
-      data: { role: "ADMIN" },
+      data: { role: "SYSTEM_ADMIN" },
     });
 
     console.log("\n✅ User promoted to ADMIN successfully!\n");

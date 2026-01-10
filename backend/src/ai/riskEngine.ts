@@ -56,7 +56,7 @@ const RULE_RISK_THRESHOLDS = {
   MEDIUM: 40,
 };
 
-function ruleBasedScore(entry: LedgerEntry): number {
+export function ruleBasedScore(entry: LedgerEntry): number {
   let score = 0;
   
   // High amount check
@@ -113,4 +113,13 @@ export async function evaluateRisk(entry: LedgerEntry) {
       isStatisticalAnomaly: zScore > 3
     }
   };
+}
+
+export async function mlRiskScore(entry: LedgerEntry): Promise<number> {
+    const result = await evaluateRisk(entry);
+    return result.anomalyScore;
+}
+
+export function evaluateAnomaly(value: number): boolean {
+    return AnomalyDetector.getInstance().isAnomaly(value);
 }
